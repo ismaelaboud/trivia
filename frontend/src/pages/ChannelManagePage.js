@@ -111,18 +111,22 @@ export const ChannelManagePage = () => {
 
   return (
     <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+      {/* Add mobile-specific padding */}
+      <div className="px-4 sm:px-0">
       {/* Header */}
-      <div className="flex items-center justify-between mb-8">
-        <div>
-          <h1 className="text-3xl font-bold text-gray-900">Manage Channel</h1>
-          <p className="text-gray-600 mt-1">{channelData.channel.name}</p>
-        </div>
+      <div className="mb-8">
+        {/* Back Arrow */}
         <button 
           onClick={() => navigate(`/channel/${slug}`)} 
-          className="btn-outline"
+          className="flex items-center text-teal hover:text-teal-dark transition-colors duration-200 mb-4"
         >
-          Back to Channel
+          <span className="text-xl mr-2">←</span>
+          <span className="text-sm font-medium">BACK TO CHANNEL</span>
         </button>
+        
+        {/* Page Title */}
+        <h1 className="text-white font-unbounded text-xl mb-2">Manage Channel</h1>
+        <p className="text-teal font-plus-jakarta-sans text-xs">{channelData.channel.name}</p>
       </div>
 
       {error && (
@@ -138,14 +142,14 @@ export const ChannelManagePage = () => {
       )}
 
       {/* Create Question Section */}
-      <div className="card mb-8">
+      <div className="card mb-3">
         <div className="flex items-center justify-between mb-6">
-          <h2 className="text-xl font-semibold text-gray-900">Questions</h2>
+          <h2 className="text-white font-unbounded text-lg">Questions</h2>
           <button 
             onClick={() => setShowCreateForm(!showCreateForm)}
-            className="btn-primary"
+            className="bg-teal hover:bg-teal-dark text-navy-900 px-3 py-1 rounded transition-colors duration-200 font-plus-jakarta-sans font-semibold text-xs uppercase"
           >
-            {showCreateForm ? 'Cancel' : 'Create New Question'}
+            {showCreateForm ? 'Cancel' : '+ Create'}
           </button>
         </div>
 
@@ -203,8 +207,11 @@ export const ChannelManagePage = () => {
         {/* Questions List */}
         <div className="space-y-4">
           {questions.length === 0 ? (
-            <div className="text-center py-8 text-gray-500">
-              No questions yet. Create your first question to get started!
+            <div className="border-2 border-dashed border-gray-600 rounded-lg p-8 text-center">
+              <div className="text-4xl mb-4 text-gray-500">?</div>
+              <div className="text-gray-400">
+                No questions yet. Create your first question to get started!
+              </div>
             </div>
           ) : (
             questions.map((question) => (
@@ -257,21 +264,22 @@ export const ChannelManagePage = () => {
 
       {/* Channel Stats */}
       <div className="card">
-        <h2 className="text-xl font-semibold text-gray-900 mb-4">Channel Statistics</h2>
+        <h2 className="text-white font-unbounded text-lg mb-4">Channel Statistics</h2>
         <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
           <div className="text-center">
-            <div className="text-2xl font-bold text-gray-900">{channelData.channel.members.length}</div>
-            <div className="text-sm text-gray-600">Total Members</div>
+            <div className="text-3xl font-unbounded font-bold text-yellow mb-2">{channelData.channel.members.length}</div>
+            <div className="text-sm text-gray-400">Total Members</div>
           </div>
           <div className="text-center">
-            <div className="text-2xl font-bold text-gray-900">{channelData.channel.totalQuestions}</div>
-            <div className="text-sm text-gray-600">Total Questions</div>
+            <div className="text-3xl font-unbounded font-bold text-yellow mb-2">{channelData.channel.totalQuestions}</div>
+            <div className="text-sm text-gray-400">Total Questions</div>
           </div>
           <div className="text-center">
-            <div className="text-2xl font-bold text-gray-900">{questions.filter(q => q.isActive).length}</div>
-            <div className="text-sm text-gray-600">Active Questions</div>
+            <div className="text-3xl font-unbounded font-bold text-yellow mb-2">{questions.filter(q => q.isActive).length}</div>
+            <div className="text-sm text-gray-400">Active Questions</div>
           </div>
         </div>
+      </div>
       </div>
     </div>
   );
