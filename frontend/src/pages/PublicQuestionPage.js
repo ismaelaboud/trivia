@@ -3,6 +3,8 @@ import { useParams, useNavigate } from 'react-router-dom';
 import { Clock, User, CheckCircle, XCircle } from 'lucide-react';
 import { useAuth } from '../contexts/AuthContext';
 
+const API_BASE_URL = process.env.REACT_APP_API_URL || 'http://localhost:5000/api';
+
 // Update document meta tags for social sharing
 const updateMetaTags = (question) => {
   if (!question) return;
@@ -81,7 +83,7 @@ export function PublicQuestionPage() {
 
   const fetchQuestion = async () => {
     try {
-      const response = await fetch(`/api/questions/share/${shareId}`);
+      const response = await fetch(`${API_BASE_URL}/questions/share/${shareId}`);
       if (!response.ok) {
         throw new Error('Question not found');
       }
@@ -111,7 +113,7 @@ export function PublicQuestionPage() {
     setError('');
 
     try {
-      const response = await fetch(`/api/questions/${question._id}/submit`, {
+      const response = await fetch(`${API_BASE_URL}/questions/${question._id}/submit`, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
