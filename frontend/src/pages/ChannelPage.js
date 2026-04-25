@@ -10,11 +10,6 @@ export const ChannelPage = () => {
   const { isAuthenticated, user } = useAuth();
   const navigate = useNavigate();
   
-  // Initialize push notifications for this channel
-  const { permission, subscribed, subscribe, unsubscribe } = usePushNotifications(
-    channelData?.channel?._id
-  );
-  
   const [channelData, setChannelData] = useState(null);
   const [activeQuestion, setActiveQuestion] = useState(null);
   const [userSubmission, setUserSubmission] = useState(null);
@@ -30,6 +25,11 @@ export const ChannelPage = () => {
   const [loadingAnswers, setLoadingAnswers] = useState(false);
   const [countdown, setCountdown] = useState(null);
   const [showShareModal, setShowShareModal] = useState(false);
+
+  // Initialize push notifications for this channel
+  const { permission, subscribed, subscribe, unsubscribe } = usePushNotifications(
+    channelData?.channel?._id
+  );
 
   useEffect(() => {
     loadChannelData();
