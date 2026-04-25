@@ -7,7 +7,7 @@ const { auth, optionalAuth } = require('../middleware/auth');
 const router = express.Router();
 
 // Submit answer to active question
-router.post('/', [
+router.post('/', optionalAuth, [
   body('channelSlug').trim().isLength({ min: 1 }).withMessage('Channel slug required'),
   body('answer').trim().isLength({ min: 1, max: 200 }).withMessage('Answer required (max 200 chars)'),
   body('guestName').optional().trim().isLength({ min: 2, max: 30 }).withMessage('Guest name must be 2-30 characters')
