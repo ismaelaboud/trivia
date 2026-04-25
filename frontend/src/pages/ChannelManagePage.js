@@ -18,6 +18,7 @@ export const ChannelManagePage = () => {
   const [showCreateForm, setShowCreateForm] = useState(false);
   const [questionText, setQuestionText] = useState('');
   const [correctAnswer, setCorrectAnswer] = useState('');
+  const [revealAt, setRevealAt] = useState('');
   const [submitting, setSubmitting] = useState(false);
 
   useEffect(() => {
@@ -55,14 +56,21 @@ export const ChannelManagePage = () => {
     setSubmitting(true);
 
     try {
-      await questionsAPI.create({
+      const questionData = {
         channelSlug: slug,
         questionText: questionText.trim(),
         correctAnswer: correctAnswer.trim()
-      });
+      };
+
+      if (revealAt) {
+        questionData.revealAt = revealAt;
+      }
+
+      await questionsAPI.create(questionData);
       
       setQuestionText('');
       setCorrectAnswer('');
+      setRevealAt('');
       setShowCreateForm(false);
       setSuccess('Question created successfully!');
       loadQuestions();
@@ -183,6 +191,21 @@ export const ChannelManagePage = () => {
                   required
                   maxLength={200}
                 />
+              </div>
+              <div>
+                <label className="block text-sm font-medium text-gray-700 mb-1">
+                  Auto Reveal Date & Time
+                </label>
+                <input
+                  type="datetime-local"
+                  value={revealAt}
+                  onChange={(e) => setRevealAt(e.target.value)}
+                  className="input-field"
+                  min={new Date(Date.now() + 5 * 60 * 1000).toISOString().slice(0, 16)}
+                />
+                <p className="text-xs text-gray-500 mt-1">
+                  The answer will reveal automatically at this time. Members will be notified.
+                </p>
               </div>
               <div className="flex space-x-2">
                 <button

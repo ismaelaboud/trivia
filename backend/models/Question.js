@@ -22,6 +22,10 @@ const questionSchema = new mongoose.Schema({
     type: Boolean,
     default: true
   },
+  revealAt: {
+    type: Date,
+    default: null
+  },
   isRevealed: {
     type: Boolean,
     default: false

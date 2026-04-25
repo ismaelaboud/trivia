@@ -11,7 +11,8 @@ const router = express.Router();
 router.post('/', auth, [
   body('channelSlug').trim().isLength({ min: 1 }).withMessage('Channel slug required'),
   body('questionText').trim().isLength({ min: 1, max: 500 }).withMessage('Question text required (max 500 chars)'),
-  body('correctAnswer').trim().isLength({ min: 1, max: 200 }).withMessage('Correct answer required (max 200 chars)')
+  body('correctAnswer').trim().isLength({ min: 1, max: 200 }).withMessage('Correct answer required (max 200 chars)'),
+  body('revealAt').optional().isISO8601().withMessage('Reveal time must be a valid date')
 ], async (req, res) => {
   try {
     const errors = validationResult(req);
@@ -19,7 +20,14 @@ router.post('/', auth, [
       return res.status(400).json({ errors: errors.array() });
     }
 
-    const { channelSlug, questionText, correctAnswer } = req.body;
+    const { channelSlug, questionText, correctAnswer, revealAt } = req.body;
+
+    // Validate that revealAt is a future date if provided
+    if (revealAt && new Date(revealAt) <= new Date()) {
+      return res.status(400).json({ 
+        message: 'Reveal time must be in the future' 
+      });
+    }
 
     // Find channel
     const channel = await Channel.findOne({ slug: channelSlug, isActive: true });
@@ -46,7 +54,8 @@ router.post('/', auth, [
     const question = new Question({
       channel: channel._id,
       questionText,
-      correctAnswer
+      correctAnswer,
+      revealAt: revealAt ? new Date(revealAt) : null
     });
 
     await question.save();

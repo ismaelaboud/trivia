@@ -21,10 +21,43 @@ export const ChannelPage = () => {
   const [showAnswersModal, setShowAnswersModal] = useState(false);
   const [selectedQuestionAnswers, setSelectedQuestionAnswers] = useState(null);
   const [loadingAnswers, setLoadingAnswers] = useState(false);
+  const [countdown, setCountdown] = useState(null);
 
   useEffect(() => {
     loadChannelData();
   }, [slug]);
+
+  // Countdown timer effect
+  useEffect(() => {
+    if (!activeQuestion || !activeQuestion.revealAt || activeQuestion.isRevealed) {
+      setCountdown(null);
+      return;
+    }
+
+    const calculateCountdown = () => {
+      const now = new Date().getTime();
+      const revealTime = new Date(activeQuestion.revealAt).getTime();
+      const distance = revealTime - now;
+
+      if (distance < 0) {
+        setCountdown(null);
+        // Auto-refresh when countdown reaches 0
+        loadChannelData();
+        return;
+      }
+
+      const hours = Math.floor(distance / (1000 * 60 * 60));
+      const minutes = Math.floor((distance % (1000 * 60 * 60)) / (1000 * 60));
+      const seconds = Math.floor((distance % (1000 * 60)) / 1000);
+
+      setCountdown(`${hours.toString().padStart(2, '0')}h ${minutes.toString().padStart(2, '0')}m ${seconds.toString().padStart(2, '0')}s`);
+    };
+
+    calculateCountdown();
+    const interval = setInterval(calculateCountdown, 1000);
+
+    return () => clearInterval(interval);
+  }, [activeQuestion]);
 
   const loadChannelData = async () => {
     try {
@@ -245,9 +278,27 @@ export const ChannelPage = () => {
               </span>
             )}
           </div>
+
+          {/* Revealed Question Banner */}
+          {activeQuestion.isRevealed && (
+            <div className="bg-yellow bg-opacity-10 border border-yellow border-opacity-30 rounded-lg p-4 mb-6">
+              <p className="text-yellow font-unbounded text-sm">
+                ✅ Answer revealed! See how you did.
+              </p>
+            </div>
+          )}
           
           <div className="question-box mb-6">
             <p className="mb-4">{activeQuestion.questionText}</p>
+            
+            {/* Countdown Timer */}
+            {countdown && !activeQuestion.isRevealed && (
+              <div className="mb-4">
+                <p className="text-yellow font-unbounded text-sm">
+                  ⏰ Reveals in: {countdown}
+                </p>
+              </div>
+            )}
             
             {activeQuestion.isRevealed && (
               <div className="bg-navy-700 border border-yellow border-opacity-30 rounded-lg p-4">
@@ -261,9 +312,34 @@ export const ChannelPage = () => {
           {!activeQuestion.isRevealed && (channelData.isMember || !isAuthenticated) && (
             <div>
               {userSubmission ? (
-                <div className="bg-navy-700 border border-teal border-opacity-30 rounded-lg p-4">
-                  <p className="text-teal">You submitted: <span className="font-semibold">{userSubmission.answer}</span></p>
-                  <p className="text-sm text-secondary mt-1">Answer will be revealed when the channel owner decides to end the question.</p>
+                <div className={`border rounded-lg p-4 ${
+                  activeQuestion.isRevealed 
+                    ? userSubmission.isCorrect 
+                      ? 'bg-green-900 bg-opacity-20 border-green-400 border-opacity-30' 
+                      : 'bg-red-900 bg-opacity-20 border-red-400 border-opacity-30'
+                    : 'bg-navy-700 border border-teal border-opacity-30'
+                }`}>
+                  <div className="flex items-center justify-between">
+                    <p className={`${activeQuestion.isRevealed 
+                      ? userSubmission.isCorrect ? 'text-green-400' : 'text-red-400'
+                      : 'text-teal'
+                    }`}>
+                      You submitted: <span className="font-semibold">{userSubmission.answer}</span>
+                    </p>
+                    {activeQuestion.isRevealed && (
+                      <span className={`text-2xl ${
+                        userSubmission.isCorrect ? 'text-green-400' : 'text-red-400'
+                      }`}>
+                        {userSubmission.isCorrect ? '✅' : '❌'}
+                      </span>
+                    )}
+                  </div>
+                  <p className="text-sm text-secondary mt-1">
+                    {activeQuestion.isRevealed 
+                      ? (userSubmission.isCorrect ? 'Correct answer!' : 'Incorrect answer.')
+                      : 'Answer will be revealed when the channel owner decides to end the question.'
+                    }
+                  </p>
                 </div>
               ) : (
                 <form onSubmit={isAuthenticated ? handleSubmitAnswer : (e) => { e.preventDefault(); setShowGuestForm(true); }} className="space-y-4">
@@ -375,9 +451,21 @@ export const ChannelPage = () => {
                   <p>{question.questionText}</p>
                 </div>
                 <div className="flex items-center justify-between">
-                  <div className="bg-navy-700 border border-yellow border-opacity-30 rounded px-3 py-1">
-                    <span className="text-sm font-medium text-yellow">Answer: {question.correctAnswer}</span>
-                  </div>
+                  {question.isRevealed ? (
+                    <div className="bg-navy-700 border border-yellow border-opacity-30 rounded px-3 py-1">
+                      <span className="text-sm font-medium text-yellow">Answer: {question.correctAnswer}</span>
+                    </div>
+                  ) : question.revealAt ? (
+                    <div className="bg-navy-700 border border-gray-500 border-opacity-30 rounded px-3 py-1">
+                      <span className="text-sm font-medium text-gray-400">
+                        Reveals {new Date(question.revealAt).toLocaleDateString()} at {new Date(question.revealAt).toLocaleTimeString([], {hour: '2-digit', minute:'2-digit'})}
+                      </span>
+                    </div>
+                  ) : (
+                    <div className="bg-navy-700 border border-gray-500 border-opacity-30 rounded px-3 py-1">
+                      <span className="text-sm font-medium text-gray-400">Pending reveal</span>
+                    </div>
+                  )}
                   <div className="flex items-center space-x-2">
                     <div className="text-sm text-secondary">
                       {question.correctSubmissions}/{question.totalSubmissions} correct
