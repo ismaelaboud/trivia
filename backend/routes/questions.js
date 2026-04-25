@@ -73,6 +73,101 @@ router.post('/', auth, [
   }
 });
 
+// Get question by shareId (public endpoint)
+router.get('/share/:shareId', async (req, res) => {
+  try {
+    const { shareId } = req.params;
+
+    const question = await Question.findOne({ shareId })
+      .populate('channel', 'name slug emoji');
+
+    if (!question) {
+      return res.status(404).json({ message: 'Question not found' });
+    }
+
+    // Don't send correct answer if not revealed
+    const questionData = {
+      _id: question._id,
+      shareId: question.shareId,
+      questionText: question.questionText,
+      correctAnswer: question.isRevealed ? question.correctAnswer : undefined,
+      isRevealed: question.isRevealed,
+      revealAt: question.revealAt,
+      revealedAt: question.revealedAt,
+      totalSubmissions: question.totalSubmissions,
+      correctSubmissions: question.correctSubmissions,
+      channel: question.channel,
+      createdAt: question.createdAt,
+      submissions: question.submissions
+    };
+
+    res.json(questionData);
+  } catch (error) {
+    console.error('Get question by shareId error:', error);
+    res.status(500).json({ message: 'Server error' });
+  }
+});
+
+// Submit answer to shared question
+router.post('/:id/submit', optionalAuth, [
+  body('answer').trim().isLength({ min: 1, max: 200 }).withMessage('Answer required (max 200 chars)'),
+  body('guestName').optional().trim().isLength({ min: 2, max: 30 }).withMessage('Guest name must be 2-30 characters')
+], async (req, res) => {
+  try {
+    const errors = validationResult(req);
+    if (!errors.isEmpty()) {
+      return res.status(400).json({ errors: errors.array() });
+    }
+
+    const { answer, guestName } = req.body;
+
+    // Find question
+    const question = await Question.findById(req.params.id).populate('channel');
+
+    if (!question) {
+      return res.status(404).json({ message: 'Question not found' });
+    }
+
+    // Check if question is still active for submissions
+    if (question.isRevealed) {
+      return res.status(400).json({ message: 'This question has been revealed and no longer accepts submissions' });
+    }
+
+    // Handle guest vs authenticated user
+    let userId = null;
+    let finalGuestName = guestName;
+
+    if (req.user) {
+      userId = req.user.id;
+    } else {
+      // Guest submission requires guest name
+      if (!guestName) {
+        return res.status(400).json({ message: 'Guest name required for guest submissions' });
+      }
+    }
+
+    // Add submission
+    await question.addSubmission(userId, finalGuestName, answer);
+
+    res.status(201).json({
+      message: 'Answer submitted successfully',
+      submissionId: question.submissions[question.submissions.length - 1]._id
+    });
+
+  } catch (error) {
+    console.error('Submit answer error:', error);
+    
+    if (error.message === 'User has already submitted an answer') {
+      return res.status(400).json({ message: 'You have already submitted an answer to this question' });
+    }
+    if (error.message === 'Guest name already used') {
+      return res.status(400).json({ message: 'This guest name has already been used for this question' });
+    }
+    
+    res.status(500).json({ message: 'Server error' });
+  }
+});
+
 // Get active question for a channel
 router.get('/:channelSlug/active', optionalAuth, async (req, res) => {
   try {

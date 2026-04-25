@@ -9,6 +9,7 @@ import { ChannelPage } from './pages/ChannelPage';
 import { ChannelManagePage } from './pages/ChannelManagePage';
 import { CreateChannelPage } from './pages/CreateChannelPage';
 import { SearchPage } from './pages/SearchPage';
+import { PublicQuestionPage } from './pages/PublicQuestionPage';
 import { ProtectedRoute } from './components/ProtectedRoute';
 
 function App() {
@@ -21,6 +22,7 @@ function App() {
           <Route path="/login" element={<LoginPage />} />
           <Route path="/register" element={<RegisterPage />} />
           <Route path="/search" element={<SearchPage />} />
+          <Route path="/q/:shareId" element={<PublicQuestionPage />} />
           <Route path="/channel/:slug" element={<ChannelPage />} />
           <Route path="/channel/:slug/manage" element={
             <ProtectedRoute>

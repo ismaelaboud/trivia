@@ -1,10 +1,16 @@
 const mongoose = require('mongoose');
+const { nanoid } = require('nanoid');
 
 const questionSchema = new mongoose.Schema({
   channel: {
     type: mongoose.Schema.Types.ObjectId,
     ref: 'Channel',
     required: true
+  },
+  shareId: {
+    type: String,
+    default: () => nanoid(10),
+    unique: true
   },
   questionText: {
     type: String,

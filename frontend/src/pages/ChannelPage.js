@@ -2,6 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import { useAuth } from '../contexts/AuthContext';
 import { channelsAPI, questionsAPI, submissionsAPI } from '../services/api';
+import { ShareModal } from '../components/ShareModal';
 
 export const ChannelPage = () => {
   const { slug } = useParams();
@@ -22,6 +23,7 @@ export const ChannelPage = () => {
   const [selectedQuestionAnswers, setSelectedQuestionAnswers] = useState(null);
   const [loadingAnswers, setLoadingAnswers] = useState(false);
   const [countdown, setCountdown] = useState(null);
+  const [showShareModal, setShowShareModal] = useState(false);
 
   useEffect(() => {
     loadChannelData();
@@ -272,11 +274,21 @@ export const ChannelPage = () => {
         <div className="card mb-8">
           <div className="flex items-center justify-between mb-4">
             <h2 className="active-question-title">Active Question</h2>
-            {activeQuestion.isRevealed && (
-              <span className="bg-navy-700 text-yellow px-3 py-1 rounded-full text-sm">
-                Answer Revealed
-              </span>
-            )}
+            <div className="flex items-center space-x-3">
+              {activeQuestion.isRevealed && (
+                <span className="bg-navy-700 text-yellow px-3 py-1 rounded-full text-sm">
+                  Answer Revealed
+                </span>
+              )}
+              <button
+                onClick={() => setShowShareModal(true)}
+                className="bg-navy-700 hover:bg-navy-600 text-teal-400 px-3 py-2 rounded-lg text-sm font-medium transition-colors flex items-center space-x-1"
+                title="Share question"
+              >
+                <span>📤</span>
+                <span>Share Question</span>
+              </button>
+            </div>
           </div>
 
           {/* Revealed Question Banner */}
@@ -572,6 +584,14 @@ export const ChannelPage = () => {
           </div>
         </div>
       )}
+
+      {/* Share Modal */}
+      <ShareModal
+        isOpen={showShareModal}
+        onClose={() => setShowShareModal(false)}
+        shareId={activeQuestion?.shareId}
+        questionText={activeQuestion?.questionText}
+      />
     </div>
   );
 };

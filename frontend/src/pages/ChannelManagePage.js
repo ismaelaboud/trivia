@@ -2,6 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import { useAuth } from '../contexts/AuthContext';
 import { channelsAPI, questionsAPI } from '../services/api';
+import { ShareModal } from '../components/ShareModal';
 
 export const ChannelManagePage = () => {
   const { slug } = useParams();
@@ -20,6 +21,8 @@ export const ChannelManagePage = () => {
   const [correctAnswer, setCorrectAnswer] = useState('');
   const [revealAt, setRevealAt] = useState('');
   const [submitting, setSubmitting] = useState(false);
+  const [showShareModal, setShowShareModal] = useState(false);
+  const [selectedQuestionForShare, setSelectedQuestionForShare] = useState(null);
 
   useEffect(() => {
     loadChannelData();
@@ -260,6 +263,19 @@ export const ChannelManagePage = () => {
                     </div>
                   </div>
                   <div className="flex space-x-2 ml-4">
+                    {question.isActive && (
+                      <button
+                        onClick={() => {
+                          setSelectedQuestionForShare(question);
+                          setShowShareModal(true);
+                        }}
+                        className="bg-navy-700 hover:bg-navy-600 text-teal-400 px-3 py-2 rounded-lg text-sm font-medium transition-colors flex items-center space-x-1"
+                        title="Share question"
+                      >
+                        <span>📤</span>
+                        <span>Share</span>
+                      </button>
+                    )}
                     {!question.isActive && !question.isRevealed && (
                       <button
                         onClick={() => questionsAPI.activate(question._id).then(() => {
@@ -303,6 +319,14 @@ export const ChannelManagePage = () => {
           </div>
         </div>
       </div>
+      
+      {/* Share Modal */}
+      <ShareModal
+        isOpen={showShareModal}
+        onClose={() => setShowShareModal(false)}
+        shareId={selectedQuestionForShare?.shareId}
+        questionText={selectedQuestionForShare?.questionText}
+      />
       </div>
     </div>
   );
