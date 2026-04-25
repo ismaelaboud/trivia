@@ -273,6 +273,40 @@ router.get('/:channelSlug/history', optionalAuth, async (req, res) => {
   }
 });
 
+// Get question submissions (channel owner only)
+router.get('/:id/submissions', auth, async (req, res) => {
+  try {
+    const question = await Question.findById(req.params.id)
+      .populate('channel', 'name slug owner')
+      .populate('submissions.user', 'username avatar');
+
+    if (!question) {
+      return res.status(404).json({ message: 'Question not found' });
+    }
+
+    // Check if user is channel owner
+    if (question.channel.owner.toString() !== req.user.id.toString()) {
+      return res.status(403).json({ message: 'Only channel owner can view submissions' });
+    }
+
+    res.json({
+      question: {
+        _id: question._id,
+        questionText: question.questionText,
+        correctAnswer: question.correctAnswer,
+        isRevealed: question.isRevealed,
+        revealedAt: question.revealedAt,
+        totalSubmissions: question.totalSubmissions,
+        correctSubmissions: question.correctSubmissions
+      },
+      submissions: question.submissions.sort((a, b) => b.submittedAt - a.submittedAt)
+    });
+  } catch (error) {
+    console.error('Get question submissions error:', error);
+    res.status(500).json({ message: 'Server error' });
+  }
+});
+
 // Delete question (channel owner only)
 router.delete('/:id', auth, async (req, res) => {
   try {

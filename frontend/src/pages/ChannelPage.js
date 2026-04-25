@@ -18,6 +18,9 @@ export const ChannelPage = () => {
   const [error, setError] = useState('');
   const [success, setSuccess] = useState('');
   const [showGuestForm, setShowGuestForm] = useState(false);
+  const [showAnswersModal, setShowAnswersModal] = useState(false);
+  const [selectedQuestionAnswers, setSelectedQuestionAnswers] = useState(null);
+  const [loadingAnswers, setLoadingAnswers] = useState(false);
 
   useEffect(() => {
     loadChannelData();
@@ -100,6 +103,20 @@ export const ChannelPage = () => {
     } catch (error) {
       console.error('Failed to reveal answer:', error);
       setError(error.response?.data?.message || 'Failed to reveal answer');
+    }
+  };
+
+  const handleViewAnswers = async (questionId) => {
+    setLoadingAnswers(true);
+    try {
+      const response = await questionsAPI.getSubmissions(questionId);
+      setSelectedQuestionAnswers(response.data);
+      setShowAnswersModal(true);
+    } catch (error) {
+      console.error('Failed to load answers:', error);
+      setError(error.response?.data?.message || 'Failed to load answers');
+    } finally {
+      setLoadingAnswers(false);
     }
   };
 
@@ -356,12 +373,109 @@ export const ChannelPage = () => {
                   <div className="bg-navy-700 border border-yellow border-opacity-30 rounded px-3 py-1">
                     <span className="text-sm font-medium text-yellow">Answer: {question.correctAnswer}</span>
                   </div>
-                  <div className="text-sm text-secondary">
-                    {question.correctSubmissions}/{question.totalSubmissions} correct
+                  <div className="flex items-center space-x-2">
+                    <div className="text-sm text-secondary">
+                      {question.correctSubmissions}/{question.totalSubmissions} correct
+                    </div>
+                    {channelData.isOwner && question.totalSubmissions > 0 && (
+                      <button
+                        onClick={() => handleViewAnswers(question._id)}
+                        disabled={loadingAnswers}
+                        className="text-xs bg-teal bg-opacity-20 text-teal px-2 py-1 rounded hover:bg-opacity-30 transition-colors"
+                      >
+                        {loadingAnswers ? 'Loading...' : 'View Answers'}
+                      </button>
+                    )}
                   </div>
                 </div>
               </div>
             ))}
+          </div>
+        </div>
+      )}
+
+      {/* Answers Modal */}
+      {showAnswersModal && selectedQuestionAnswers && (
+        <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center p-4 z-50">
+          <div className="bg-navy-800 rounded-lg max-w-4xl w-full max-h-[80vh] overflow-hidden">
+            <div className="p-6 border-b border-navy-700">
+              <div className="flex items-center justify-between">
+                <h3 className="text-xl font-bold text-white">Question Answers</h3>
+                <button
+                  onClick={() => setShowAnswersModal(false)}
+                  className="text-secondary hover:text-white transition-colors"
+                >
+                  <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
+                  </svg>
+                </button>
+              </div>
+            </div>
+            
+            <div className="p-6 overflow-y-auto max-h-[60vh]">
+              {/* Question Info */}
+              <div className="mb-6">
+                <div className="question-box mb-4">
+                  <p className="text-white font-medium mb-2">{selectedQuestionAnswers.question.questionText}</p>
+                </div>
+                <div className="bg-navy-700 border border-yellow border-opacity-30 rounded-lg p-4">
+                  <p className="text-sm font-medium text-yellow mb-1">Correct Answer:</p>
+                  <p className="text-yellow font-semibold">{selectedQuestionAnswers.question.correctAnswer}</p>
+                </div>
+                <div className="mt-2 text-sm text-secondary">
+                  {selectedQuestionAnswers.question.correctSubmissions}/{selectedQuestionAnswers.question.totalSubmissions} correct answers
+                </div>
+              </div>
+
+              {/* Submissions List */}
+              <div className="space-y-3">
+                <h4 className="font-semibold text-white mb-3">Submissions ({selectedQuestionAnswers.submissions.length})</h4>
+                {selectedQuestionAnswers.submissions.map((submission, index) => (
+                  <div key={index} className="bg-navy-700 border border-navy-600 rounded-lg p-4">
+                    <div className="flex items-start justify-between">
+                      <div className="flex items-center space-x-3">
+                        <div className="w-8 h-8 bg-navy-600 rounded-full flex items-center justify-center">
+                          {submission.user ? (
+                            <span className="text-secondary text-sm font-medium">
+                              {submission.user.username.charAt(0).toUpperCase()}
+                            </span>
+                          ) : (
+                            <span className="text-secondary text-sm font-medium">G</span>
+                          )}
+                        </div>
+                        <div>
+                          <p className="font-medium text-white">
+                            {submission.user ? submission.user.username : submission.guestName}
+                          </p>
+                          <p className="text-sm text-secondary">
+                            {submission.user ? 'User' : 'Guest'} • {new Date(submission.submittedAt).toLocaleString()}
+                          </p>
+                        </div>
+                      </div>
+                      <div className="text-right">
+                        <div className={`px-2 py-1 rounded text-xs font-medium ${
+                          submission.isCorrect 
+                            ? 'bg-green-900 bg-opacity-30 text-green-400' 
+                            : 'bg-red-900 bg-opacity-30 text-red-400'
+                        }`}>
+                          {submission.isCorrect ? 'Correct' : 'Incorrect'}
+                        </div>
+                      </div>
+                    </div>
+                    <div className="mt-3 pt-3 border-t border-navy-600">
+                      <p className="text-sm text-secondary mb-1">Answer:</p>
+                      <p className="text-white font-medium">{submission.answer}</p>
+                    </div>
+                  </div>
+                ))}
+                
+                {selectedQuestionAnswers.submissions.length === 0 && (
+                  <div className="text-center py-8 text-secondary">
+                    No submissions received for this question
+                  </div>
+                )}
+              </div>
+            </div>
           </div>
         </div>
       )}

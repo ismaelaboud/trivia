@@ -65,6 +65,7 @@ export const questionsAPI = {
   getChannelQuestions: (channelSlug) => api.get(`/questions/channel/${channelSlug}`),
   activate: (questionId) => api.patch(`/questions/${questionId}/activate`),
   delete: (questionId) => api.delete(`/questions/${questionId}`),
+  getSubmissions: (questionId) => api.get(`/questions/${questionId}/submissions`),
 };
 
 // Submissions API
