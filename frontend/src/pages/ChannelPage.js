@@ -4,6 +4,7 @@ import { useAuth } from '../contexts/AuthContext';
 import { channelsAPI, questionsAPI, submissionsAPI } from '../services/api';
 import { ShareModal } from '../components/ShareModal';
 import { usePushNotifications } from '../hooks/usePushNotifications';
+import ChatBox from '../components/ChatBox';
 
 export const ChannelPage = () => {
   const { slug } = useParams();
@@ -454,6 +455,16 @@ export const ChannelPage = () => {
               'Check back later for a new question from the channel owner.'
             )}
           </p>
+        </div>
+      )}
+
+      {/* Chat Box */}
+      {(channelData.isMember || !isAuthenticated) && (
+        <div className="mb-8">
+          <ChatBox 
+            channelSlug={channelData.channel.slug}
+            userName={user?.username || guestName || 'Guest'}
+          />
         </div>
       )}
 

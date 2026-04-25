@@ -170,6 +170,15 @@ router.post('/', auth, [
       icon: '/logo.png'
     });
 
+    // Send system message to chat
+    const io = req.app.get('io');
+    if (io) {
+      io.to(channelSlug).emit('system_message', {
+        text: '🧠 A new question has been posted!',
+        timestamp: new Date()
+      });
+    }
+
     res.status(201).json(question);
   } catch (error) {
     console.error('Create question error:', error);

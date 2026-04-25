@@ -2,9 +2,23 @@ const express = require('express');
 const mongoose = require('mongoose');
 const cors = require('cors');
 const webpush = require('web-push');
+const http = require('http');
+const { Server } = require('socket.io');
 require('dotenv').config();
 
 const app = express();
+const server = http.createServer(app);
+const io = new Server(server, {
+  cors: {
+    origin: process.env.NODE_ENV === 'production' 
+      ? [process.env.PROD_FRONTEND_URL] 
+      : [process.env.FRONTEND_URL],
+    methods: ['GET', 'POST']
+  }
+});
+
+// Attach io to app for use in routes
+app.set('io', io);
 
 // Middleware
 app.use(cors({
@@ -36,11 +50,77 @@ app.use('/api/channels', require('./routes/channels'));
 app.use('/api/questions', require('./routes/questions'));
 app.use('/api/submissions', require('./routes/submissions'));
 app.use('/api/notifications', require('./routes/notifications'));
+app.use('/api/chat', require('./routes/chat'));
+
+// Socket.io events
+const Channel = require('./models/Channel');
+const Message = require('./models/Message');
+
+io.on('connection', (socket) => {
+  
+  // User joins a channel chat room
+  socket.on('join_channel', async ({ channelSlug, userName }) => {
+    socket.join(channelSlug);
+    socket.data.channelSlug = channelSlug;
+    socket.data.userName = userName;
+    
+    // Broadcast join message to room
+    io.to(channelSlug).emit('system_message', {
+      text: `${userName} joined the chat`,
+      timestamp: new Date()
+    });
+  });
+  
+  // User sends a message
+  socket.on('send_message', async ({ channelSlug, text, senderName, senderId }) => {
+    
+    // Sanitize — max 500 chars, no empty
+    if (!text?.trim() || text.length > 500) return;
+    
+    // Find channel
+    const channel = await Channel.findOne({ 
+      slug: channelSlug 
+    });
+    if (!channel) return;
+    
+    // Save to DB
+    const message = await Message.create({
+      channel: channel._id,
+      sender: senderId || null,
+      senderName,
+      senderInitial: senderName.charAt(0).toUpperCase(),
+      text: text.trim()
+    });
+    
+    // Broadcast to all in room
+    io.to(channelSlug).emit('new_message', {
+      _id: message._id,
+      senderName: message.senderName,
+      senderInitial: message.senderInitial,
+      text: message.text,
+      createdAt: message.createdAt
+    });
+  });
+  
+  // User leaves
+  socket.on('disconnect', () => {
+    if (socket.data.channelSlug && 
+        socket.data.userName) {
+      io.to(socket.data.channelSlug).emit(
+        'system_message', {
+          text: `${socket.data.userName} left`,
+          timestamp: new Date()
+        }
+      );
+    }
+  });
+});
 
 // Start cron jobs
-require('./jobs/autoReveal');
+const autoReveal = require('./jobs/autoReveal');
+autoReveal.setIO(io);
 
 const PORT = process.env.PORT || 5000;
-app.listen(PORT, () => {
+server.listen(PORT, () => {
   console.log(`Server running on port ${PORT}`);
 });

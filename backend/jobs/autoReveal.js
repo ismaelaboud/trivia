@@ -3,6 +3,12 @@ const Question = require('../models/Question');
 const ChannelMember = require('../models/ChannelMember');
 const { notifyChannelMembers } = require('../utils/pushNotification');
 
+// Get io instance from app (will be set when server.js runs)
+let io = null;
+exports.setIO = (ioInstance) => {
+  io = ioInstance;
+};
+
 // Runs every minute
 cron.schedule('* * * * *', async () => {
   try {
@@ -27,6 +33,14 @@ cron.schedule('* * * * *', async () => {
         url: `/q/${question.shareId}`,
         icon: '/logo.png'
       });
+
+      // Send system message to chat
+      if (io) {
+        io.to(question.channel.slug).emit('system_message', {
+          text: `✅ Answer revealed: ${question.correctAnswer}`,
+          timestamp: new Date()
+        });
+      }
 
       // Update member scores for all submissions
       for (const submission of question.submissions) {
