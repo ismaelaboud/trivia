@@ -1,0 +1,370 @@
+import React, { useState, useEffect } from 'react';
+import { useParams, useNavigate } from 'react-router-dom';
+import { useAuth } from '../contexts/AuthContext';
+import { channelsAPI, questionsAPI, submissionsAPI } from '../services/api';
+
+export const ChannelPage = () => {
+  const { slug } = useParams();
+  const { isAuthenticated, user } = useAuth();
+  const navigate = useNavigate();
+  
+  const [channelData, setChannelData] = useState(null);
+  const [activeQuestion, setActiveQuestion] = useState(null);
+  const [userSubmission, setUserSubmission] = useState(null);
+  const [answer, setAnswer] = useState('');
+  const [guestName, setGuestName] = useState('');
+  const [loading, setLoading] = useState(true);
+  const [submitting, setSubmitting] = useState(false);
+  const [error, setError] = useState('');
+  const [success, setSuccess] = useState('');
+  const [showGuestForm, setShowGuestForm] = useState(false);
+
+  useEffect(() => {
+    loadChannelData();
+  }, [slug]);
+
+  const loadChannelData = async () => {
+    try {
+      const response = await channelsAPI.getBySlug(slug);
+      setChannelData(response.data);
+      
+      // Load active question if exists
+      if (response.data.activeQuestion) {
+        setActiveQuestion(response.data.activeQuestion);
+        
+        // Check if user has already submitted
+        if (isAuthenticated && response.data.isMember) {
+          try {
+            const submissionResponse = await submissionsAPI.getUserSubmission(response.data.activeQuestion._id);
+            setUserSubmission(submissionResponse.data.submission);
+          } catch (error) {
+            // User hasn't submitted yet
+          }
+        }
+      }
+    } catch (error) {
+      console.error('Failed to load channel:', error);
+      setError('Channel not found');
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const handleJoinChannel = async () => {
+    if (!isAuthenticated) {
+      setShowGuestForm(true);
+      return;
+    }
+
+    try {
+      await channelsAPI.join(slug);
+      loadChannelData(); // Refresh data
+      setSuccess('Successfully joined the channel!');
+    } catch (error) {
+      console.error('Failed to join channel:', error);
+      setError(error.response?.data?.message || 'Failed to join channel');
+    }
+  };
+
+  const handleSubmitAnswer = async (e) => {
+    e.preventDefault();
+    setSubmitting(true);
+
+    try {
+      const submissionData = {
+        channelSlug: slug,
+        answer: answer.trim()
+      };
+
+      if (!isAuthenticated) {
+        submissionData.guestName = guestName.trim();
+      }
+
+      await submissionsAPI.submit(submissionData);
+      setUserSubmission({ answer: answer.trim() });
+      setAnswer('');
+      setSuccess('Answer submitted successfully!');
+    } catch (error) {
+      console.error('Failed to submit answer:', error);
+      setError(error.response?.data?.message || 'Failed to submit answer');
+    } finally {
+      setSubmitting(false);
+    }
+  };
+
+  const handleRevealAnswer = async () => {
+    try {
+      await questionsAPI.revealAnswer(activeQuestion._id);
+      loadChannelData(); // Refresh to show revealed answer
+      setSuccess('Answer revealed and submissions scored!');
+    } catch (error) {
+      console.error('Failed to reveal answer:', error);
+      setError(error.response?.data?.message || 'Failed to reveal answer');
+    }
+  };
+
+  if (loading) {
+    return (
+      <div className="flex justify-center items-center min-h-screen">
+        <div className="loading-spinner"></div>
+      </div>
+    );
+  }
+
+  if (!channelData) {
+    return (
+      <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+        <div className="text-center">
+          <h1 className="text-2xl font-bold text-gray-900">Channel Not Found</h1>
+          <p className="text-gray-600 mt-2">The channel you're looking for doesn't exist.</p>
+        </div>
+      </div>
+    );
+  }
+
+  return (
+    <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+      {/* Channel Header */}
+      <div className="card mb-8">
+        <div className="flex items-start">
+          <div className="w-16 h-16 channel-avatar rounded-lg flex items-center justify-center mr-4 flex-shrink-0">
+            {channelData.channel.avatar ? (
+              <img src={channelData.channel.avatar} alt="Avatar" className="w-full h-full rounded-lg object-cover" />
+            ) : (
+              <span className="font-bold text-xl">
+                {channelData.channel.name.charAt(0).toUpperCase()}
+              </span>
+            )}
+          </div>
+          <div className="flex-1">
+            <h1 className="channel-name">{channelData.channel.name}</h1>
+            <p className="channel-slug mb-2">/{channelData.channel.slug}</p>
+            {channelData.channel.description && (
+              <p className="channel-description mb-4">{channelData.channel.description}</p>
+            )}
+            <div className="flex items-center space-x-4 text-sm channel-meta">
+              <span>by {channelData.channel.owner.username}</span>
+              <span>{channelData.channel.members.length} members</span>
+              <span>{channelData.channel.totalQuestions} questions</span>
+            </div>
+          </div>
+        </div>
+
+        {/* Join/Leave Button */}
+        {!channelData.isMember && (
+          <div className="mt-6">
+            <button onClick={handleJoinChannel} className="btn-primary">
+              Join Channel
+            </button>
+          </div>
+        )}
+      </div>
+
+      {error && (
+        <div className="bg-navy-800 border border-coral border-opacity-30 text-coral px-4 py-3 rounded-lg mb-6">
+          {error}
+        </div>
+      )}
+
+      {success && (
+        <div className="bg-navy-800 border border-teal border-opacity-30 text-teal px-4 py-3 rounded-lg mb-6">
+          {success}
+        </div>
+      )}
+
+      {/* Guest Form Modal */}
+      {showGuestForm && (
+        <div className="card mb-6 bg-navy-700 border-teal border-opacity-30">
+          <h3 className="section-heading mb-4">Join as Guest</h3>
+          <form onSubmit={handleSubmitAnswer} className="space-y-4">
+            <div>
+              <label className="block text-sm font-medium text-white mb-1 font-body">
+                Your Name
+              </label>
+              <input
+                type="text"
+                value={guestName}
+                onChange={(e) => setGuestName(e.target.value)}
+                className="input-field"
+                placeholder="Enter your name"
+                required
+                minLength={2}
+                maxLength={30}
+              />
+            </div>
+            <div className="flex space-x-2">
+              <button
+                type="submit"
+                disabled={!guestName.trim() || !answer.trim()}
+                className="btn-primary"
+              >
+                Submit Answer
+              </button>
+              <button
+                type="button"
+                onClick={() => setShowGuestForm(false)}
+                className="btn-outline"
+              >
+                Cancel
+              </button>
+            </div>
+          </form>
+        </div>
+      )}
+
+      {/* Active Question */}
+      {activeQuestion ? (
+        <div className="card mb-8">
+          <div className="flex items-center justify-between mb-4">
+            <h2 className="active-question-title">Active Question</h2>
+            {activeQuestion.isRevealed && (
+              <span className="bg-navy-700 text-yellow px-3 py-1 rounded-full text-sm">
+                Answer Revealed
+              </span>
+            )}
+          </div>
+          
+          <div className="question-box mb-6">
+            <p className="mb-4">{activeQuestion.questionText}</p>
+            
+            {activeQuestion.isRevealed && (
+              <div className="bg-navy-700 border border-yellow border-opacity-30 rounded-lg p-4">
+                <p className="text-sm font-medium text-yellow mb-1">Correct Answer:</p>
+                <p className="text-yellow font-semibold">{activeQuestion.correctAnswer}</p>
+              </div>
+            )}
+          </div>
+
+          {/* Submission Form */}
+          {!activeQuestion.isRevealed && (channelData.isMember || !isAuthenticated) && (
+            <div>
+              {userSubmission ? (
+                <div className="bg-navy-700 border border-teal border-opacity-30 rounded-lg p-4">
+                  <p className="text-teal">You submitted: <span className="font-semibold">{userSubmission.answer}</span></p>
+                  <p className="text-sm text-secondary mt-1">Answer will be revealed when the channel owner decides to end the question.</p>
+                </div>
+              ) : (
+                <form onSubmit={isAuthenticated ? handleSubmitAnswer : (e) => { e.preventDefault(); setShowGuestForm(true); }} className="space-y-4">
+                  <div>
+                    <label className="block text-sm font-medium text-white mb-1 font-body">
+                      Your Answer
+                    </label>
+                    <input
+                      type="text"
+                      value={answer}
+                      onChange={(e) => setAnswer(e.target.value)}
+                      className="input-field"
+                      placeholder="Enter your answer"
+                      required
+                      maxLength={200}
+                    />
+                  </div>
+                  <button
+                    type="submit"
+                    disabled={!answer.trim() || submitting}
+                    className="btn-primary"
+                  >
+                    {submitting ? 'Submitting...' : 'Submit Answer'}
+                  </button>
+                </form>
+              )}
+            </div>
+          )}
+
+          {/* Owner Controls */}
+          {channelData.isOwner && !activeQuestion.isRevealed && (
+            <div className="mt-6 pt-6 border-t border-navy-700">
+              <h3 className="section-heading mb-4">Owner Controls</h3>
+              <div className="flex items-center justify-between mb-4">
+                <div>
+                  <p className="text-sm text-secondary">
+                    {activeQuestion.submissions.length} submissions received
+                  </p>
+                </div>
+                <button
+                  onClick={handleRevealAnswer}
+                  className="btn-primary"
+                >
+                  Reveal Answer & Score
+                </button>
+              </div>
+            </div>
+          )}
+        </div>
+      ) : (
+        <div className="card mb-8">
+          <h2 className="section-heading mb-4">No Active Question</h2>
+          <p className="text-secondary">
+            {channelData.isOwner ? (
+              <>
+                Create a new question to engage your audience.
+                <button
+                  onClick={() => navigate(`/channel/${slug}/manage`)}
+                  className="btn-primary ml-4"
+                >
+                  Create Question
+                </button>
+              </>
+            ) : (
+              'Check back later for a new question from the channel owner.'
+            )}
+          </p>
+        </div>
+      )}
+
+      {/* Leaderboard */}
+      {channelData.leaderboard && channelData.leaderboard.length > 0 && (
+        <div className="card mb-8">
+          <h2 className="section-heading mb-4">Leaderboard</h2>
+          <div className="space-y-3">
+            {channelData.leaderboard.map((entry, index) => (
+              <div key={entry.user._id} className="flex items-center justify-between py-2 border-b border-navy-700 last:border-0">
+                <div className="flex items-center">
+                  <span className={`w-8 h-8 rounded-full flex items-center justify-center mr-3 text-sm font-medium leaderboard-rank ${
+                    index === 0 ? 'rank-1' : index === 1 ? 'rank-2' : index === 2 ? 'rank-3' : 'text-secondary'
+                  }`}>
+                    {index + 1}
+                  </span>
+                  <div className="w-8 h-8 bg-navy-700 rounded-full flex items-center justify-center mr-3">
+                    <span className="text-secondary text-sm font-medium">
+                      {entry.user.username.charAt(0).toUpperCase()}
+                    </span>
+                  </div>
+                  <span className="font-medium text-white">{entry.user.username}</span>
+                </div>
+                <div className="text-right">
+                  <p className="font-semibold text-white">{entry.totalScore} points</p>
+                  <p className="text-sm text-secondary">{entry.correctAnswers}/{entry.questionsAnswered} correct</p>
+                </div>
+              </div>
+            ))}
+          </div>
+        </div>
+      )}
+
+      {/* Recent Questions */}
+      {channelData.recentQuestions && channelData.recentQuestions.length > 0 && (
+        <div className="card">
+          <h2 className="section-heading mb-4">Recent Questions</h2>
+          <div className="space-y-4">
+            {channelData.recentQuestions.map((question) => (
+              <div key={question._id} className="border-b border-navy-700 pb-4 last:border-0 last:pb-0">
+                <div className="question-box mb-2">
+                  <p>{question.questionText}</p>
+                </div>
+                <div className="flex items-center justify-between">
+                  <div className="bg-navy-700 border border-yellow border-opacity-30 rounded px-3 py-1">
+                    <span className="text-sm font-medium text-yellow">Answer: {question.correctAnswer}</span>
+                  </div>
+                  <div className="text-sm text-secondary">
+                    {question.correctSubmissions}/{question.totalSubmissions} correct
+                  </div>
+                </div>
+              </div>
+            ))}
+          </div>
+        </div>
+      )}
+    </div>
+  );
+};

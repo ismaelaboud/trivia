@@ -1,0 +1,248 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+body {
+  margin: 0;
+  font-family: 'Plus Jakarta Sans', sans-serif;
+  font-size: 16px;
+  font-weight: 400;
+  line-height: 1.65;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+  background-color: #0D1B2A;
+  color: #FFFFFF;
+}
+
+/* Main content padding for fixed navbar */
+main {
+  padding-top: 3.5rem; /* 56px for mobile navbar */
+}
+
+@media (min-width: 768px) {
+  main {
+    padding-top: 4rem; /* 64px for desktop navbar */
+  }
+}
+
+h1, h2, h3, h4 {
+  font-family: 'Unbounded', sans-serif;
+  letter-spacing: -0.5px;
+  line-height: 1.15;
+}
+
+code {
+  font-family: source-code-pro, Menlo, Monaco, Consolas, 'Courier New',
+    monospace;
+}
+
+.btn-primary {
+  @apply bg-teal hover:bg-teal-dark text-navy-900 py-2 px-4 rounded-lg transition-colors duration-200;
+  font-family: 'Plus Jakarta Sans', sans-serif;
+  font-weight: 600;
+  font-size: 14px;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+}
+
+.btn-secondary {
+  @apply bg-transparent border border-teal text-teal hover:bg-teal hover:text-navy-900 py-2 px-4 rounded-lg transition-colors duration-200;
+  font-family: 'Plus Jakarta Sans', sans-serif;
+  font-weight: 600;
+  font-size: 14px;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+}
+
+.btn-outline {
+  @apply border border-teal text-teal hover:bg-teal hover:text-navy-900 py-2 px-4 rounded-lg transition-colors duration-200;
+  font-family: 'Plus Jakarta Sans', sans-serif;
+  font-weight: 600;
+  font-size: 14px;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+}
+
+.btn-destructive {
+  @apply bg-coral hover:bg-coral-dark text-white py-2 px-4 rounded-lg transition-colors duration-200;
+  font-family: 'Plus Jakarta Sans', sans-serif;
+  font-weight: 600;
+  font-size: 14px;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+}
+
+.input-field {
+  @apply w-full px-3 py-2 bg-navy-700 border border-transparent text-white rounded-lg focus:outline-none focus:ring-2 focus:ring-teal focus:border-transparent placeholder-gray-400;
+}
+
+.card {
+  @apply bg-navy-800 rounded-lg border border-teal border-opacity-15 p-6;
+}
+
+.loading-spinner {
+  @apply animate-spin rounded-full h-8 w-8 border-b-2 border-teal;
+}
+
+.text-primary {
+  @apply text-white;
+}
+
+.text-secondary {
+  @apply text-gray-300;
+}
+
+.nav-link {
+  @apply text-gray-300 hover:text-teal transition-colors duration-200;
+}
+
+.nav-link-active {
+  @apply text-teal;
+}
+
+.accent-text {
+  @apply text-yellow;
+}
+
+.correct-indicator {
+  @apply text-yellow;
+}
+
+.wrong-indicator {
+  @apply text-coral;
+}
+
+.rank-1 {
+  @apply text-yellow;
+}
+
+.rank-2 {
+  @apply text-gray-300;
+}
+
+.rank-3 {
+  @apply text-coral;
+}
+
+.hero-heading {
+  font-family: 'Unbounded', sans-serif;
+  font-weight: 700;
+  font-size: 48px;
+  line-height: 1.15;
+  letter-spacing: -0.5px;
+}
+
+@media (max-width: 768px) {
+  .hero-heading {
+    font-size: 32px;
+  }
+}
+
+.section-heading {
+  font-family: 'Unbounded', sans-serif;
+  font-weight: 700;
+  font-size: 28px;
+  line-height: 1.15;
+  letter-spacing: -0.5px;
+}
+
+.card-title {
+  font-family: 'Unbounded', sans-serif;
+  font-weight: 400;
+  font-size: 18px;
+  line-height: 1.15;
+  letter-spacing: -0.5px;
+}
+
+.leaderboard-rank {
+  font-family: 'Unbounded', sans-serif;
+  font-weight: 900;
+  line-height: 1.15;
+  letter-spacing: -0.5px;
+}
+
+/* Global text color fixes for navy background */
+p, span, label, li, td, th, small {
+  color: #A8B8C8;
+}
+
+h1, h2, h3, h4, h5, h6 {
+  color: #FFFFFF;
+}
+
+a {
+  color: #00C9A7;
+}
+
+/* Channel page text fixes */
+/* Channel name */
+.channel-name, h1, h2 {
+  color: #FFFFFF;
+  font-family: 'Unbounded', sans-serif;
+}
+
+/* Channel slug e.g. /knowislam */
+.channel-slug {
+  color: #00C9A7;
+}
+
+/* Channel description */
+.channel-description {
+  color: #A8B8C8;
+}
+
+/* Channel meta — "by thegoat · 1 members · 1 questions" */
+.channel-meta, .channel-meta span {
+  color: #A8B8C8;
+}
+
+/* Channel avatar/icon */
+.channel-avatar {
+  background: #00C9A7;
+  color: #0D1B2A;
+  font-family: 'Unbounded', sans-serif;
+  font-weight: 700;
+  border-radius: 10px;
+}
+
+/* Active Question section */
+/* "Active Question" label */
+.section-label, .active-question-title {
+  color: #FFE66D;
+  font-family: 'Unbounded', sans-serif;
+  font-size: 13px;
+  text-transform: uppercase;
+  letter-spacing: 1px;
+}
+
+/* Question text box — change from white bg to dark */
+.question-box {
+  background: #162D44;
+  border: 1px solid rgba(0, 201, 167, 0.2);
+  color: #FFFFFF;
+  border-radius: 10px;
+  padding: 24px;
+  font-family: 'Plus Jakarta Sans', sans-serif;
+  font-size: 18px;
+  font-weight: 500;
+}
+
+/* Search bar fixes */
+input[type="search"], .search-input {
+  padding-left: 44px;  /* push text clear of the icon */
+}
+
+.search-wrapper {
+  position: relative;
+}
+
+.search-icon {
+  position: absolute;
+  left: 14px;
+  top: 50%;
+  transform: translateY(-50%);
+  color: #A8B8C8;
+  width: 18px;
+  height: 18px;
+  pointer-events: none;
+}
