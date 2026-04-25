@@ -50,7 +50,7 @@ export const SearchPage = () => {
   };
 
   return (
-    <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+    <div className="discover-page max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
       <div className="mb-8">
         <h1 className="section-heading">Discover Channels</h1>
         <p className="text-secondary mt-2">Find trivia channels to join and test your knowledge</p>
@@ -103,42 +103,36 @@ export const SearchPage = () => {
               </div>
               
               {searchResults.map((channel) => (
-                <div key={channel._id} className="card">
-                  <div className="flex items-start">
-                    <div className="w-16 h-16 channel-avatar rounded-lg flex items-center justify-center mr-4 flex-shrink-0">
+                <div key={channel._id} className="card channel-card">
+                  <div className="channel-card-top">
+                    <div className="w-16 h-16 channel-avatar rounded-lg flex items-center justify-center flex-shrink-0">
                       <span className="font-bold text-xl">
                         {channel.name.charAt(0).toUpperCase()}
                       </span>
                     </div>
                     
                     <div className="flex-1">
-                      <div className="flex items-start justify-between">
-                        <div className="flex-1">
-                          <h3 className="channel-name">{channel.name}</h3>
-                          <p className="channel-slug mb-2">/{channel.slug}</p>
-                          
-                          {channel.description && (
-                            <p className="channel-description mb-3 line-clamp-2">{channel.description}</p>
-                          )}
-                          
-                          <div className="flex items-center space-x-4 text-sm channel-meta">
-                            <span>by {channel.owner.username}</span>
-                            <span>{channel.members.length} members</span>
-                            <span>{channel.totalQuestions} questions</span>
-                          </div>
-                        </div>
-                        
-                        <div className="ml-4 flex flex-col space-y-2">
-                          <Link
-                            to={`/channel/${channel.slug}`}
-                            className="btn-outline text-sm whitespace-nowrap"
-                          >
-                            View Channel
-                          </Link>
-                        </div>
+                      <h3 className="channel-name">{channel.name}</h3>
+                      <p className="channel-slug mb-2">/{channel.slug}</p>
+                      
+                      {channel.description && (
+                        <p className="channel-description mb-3 line-clamp-2">{channel.description}</p>
+                      )}
+                      
+                      <div className="flex items-center space-x-4 text-sm channel-meta">
+                        <span>by {channel.owner.username}</span>
+                        <span>{channel.members.length} members</span>
+                        <span>{channel.totalQuestions} questions</span>
                       </div>
                     </div>
                   </div>
+                  
+                  <Link
+                    to={`/channel/${channel.slug}`}
+                    className="btn-outline text-sm whitespace-nowrap view-channel-btn"
+                  >
+                    View Channel
+                  </Link>
                 </div>
               ))}
               

@@ -246,3 +246,59 @@ input[type="search"], .search-input {
   height: 18px;
   pointer-events: none;
 }
+
+/* Global overflow guard */
+html, body {
+  overflow-x: hidden;
+  width: 100%;
+}
+
+*, *::before, *::after {
+  box-sizing: border-box;
+}
+
+/* Discover page container */
+.discover-page {
+  padding: 0 16px;
+  width: 100%;
+  box-sizing: border-box;
+  overflow-x: hidden;
+}
+
+/* Channel card responsive layout */
+.channel-card {
+  display: flex;
+  flex-direction: column;
+  width: 100%;
+  box-sizing: border-box;
+  padding: 16px;
+  gap: 12px;
+}
+
+/* Top row: avatar + text info */
+.channel-card-top {
+  display: flex;
+  flex-direction: row;
+  gap: 12px;
+  align-items: flex-start;
+}
+
+/* Button full width on mobile */
+.channel-card .view-channel-btn {
+  width: 100%;
+  text-align: center;
+}
+
+/* Desktop layout (≥ 768px) */
+@media (min-width: 768px) {
+  .channel-card {
+    flex-direction: row;
+    align-items: center;
+    justify-content: space-between;
+  }
+  
+  .channel-card .view-channel-btn {
+    width: auto;
+    flex-shrink: 0;
+  }
+}
