@@ -144,11 +144,16 @@ export const ChannelPage = () => {
       {/* Channel Header */}
       <div className="card mb-8">
         <div className="flex items-start">
-          <div className="w-16 h-16 channel-avatar rounded-lg flex items-center justify-center mr-4 flex-shrink-0">
+          <div className={`w-16 h-16 channel-avatar rounded-lg flex items-center justify-center mr-4 flex-shrink-0 ${
+            channelData.channel.avatar ? 'is-emoji' : 'is-letter-fallback'
+          }`}
+               style={channelData.channel.avatar ? {} : { backgroundColor: '#00C9A7' }}>
             {channelData.channel.avatar ? (
-              <img src={channelData.channel.avatar} alt="Avatar" className="w-full h-full rounded-lg object-cover" />
+              <span className="text-4xl">
+                {channelData.channel.avatar}
+              </span>
             ) : (
-              <span className="font-bold text-xl">
+              <span className="text-white font-bold text-xl">
                 {channelData.channel.name.charAt(0).toUpperCase()}
               </span>
             )}

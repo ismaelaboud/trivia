@@ -1,6 +1,7 @@
 import React, { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { channelsAPI } from '../services/api';
+import { EmojiPicker } from '../components/EmojiPicker';
 
 export const CreateChannelPage = () => {
   const [formData, setFormData] = useState({
@@ -11,6 +12,14 @@ export const CreateChannelPage = () => {
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState('');
   const navigate = useNavigate();
+
+  const handleAvatarChange = (avatar) => {
+    setFormData({
+      ...formData,
+      avatar
+    });
+    if (error) setError('');
+  };
 
   const handleChange = (e) => {
     setFormData({
@@ -80,6 +89,12 @@ export const CreateChannelPage = () => {
               </p>
             </div>
 
+            <EmojiPicker 
+              value={formData.avatar}
+              onChange={handleAvatarChange}
+              channelName={formData.name}
+            />
+
             <div>
               <label htmlFor="description" className="block text-sm font-medium text-gray-700 mb-2">
                 Description
@@ -98,24 +113,6 @@ export const CreateChannelPage = () => {
                 {formData.description.length}/500 characters
               </p>
             </div>
-
-            <div>
-              <label htmlFor="avatar" className="block text-sm font-medium text-gray-700 mb-2">
-                Avatar URL
-              </label>
-              <input
-                id="avatar"
-                name="avatar"
-                type="url"
-                className="input-field"
-                placeholder="https://example.com/avatar.jpg (optional)"
-                value={formData.avatar}
-                onChange={handleChange}
-              />
-              <p className="mt-1 text-sm text-gray-500">
-                Link to an image for your channel avatar
-              </p>
-            </div>
           </div>
         </div>
 
@@ -124,14 +121,16 @@ export const CreateChannelPage = () => {
           <div className="card">
             <h3 className="text-lg font-semibold text-gray-900 mb-4">Preview</h3>
             <div className="flex items-start">
-              <div className="w-12 h-12 bg-gray-200 rounded-lg flex items-center justify-center mr-3 flex-shrink-0">
-                {formData.avatar ? (
-                  <img src={formData.avatar} alt="Avatar" className="w-full h-full rounded-lg object-cover" />
-                ) : (
-                  <span className="text-gray-600 font-bold text-lg">
-                    {formData.name.charAt(0).toUpperCase()}
-                  </span>
-                )}
+              <div className={`w-12 h-12 flex items-center justify-center rounded-lg mr-3 flex-shrink-0 ${
+                formData.avatar ? 'is-emoji' : 'is-letter-fallback'
+              }`}
+                   style={formData.avatar 
+                     ? { border: '1px solid rgba(0,201,167,0.2)' } 
+                     : { backgroundColor: '#00C9A7' }
+                   }>
+                <span className={formData.avatar ? '' : 'text-white font-bold text-lg'}>
+                  {formData.avatar || formData.name.charAt(0).toUpperCase()}
+                </span>
               </div>
               <div className="flex-1">
                 <h4 className="font-semibold text-gray-900">{formData.name}</h4>

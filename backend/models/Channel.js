@@ -21,7 +21,14 @@ const channelSchema = new mongoose.Schema({
   },
   avatar: {
     type: String,
-    default: ''
+    default: '',
+    validate: {
+      validator: function(value) {
+        // Allow empty string or single emoji character
+        return value === '' || /^[\p{Emoji}\u200D]+$/u.test(value);
+      },
+      message: 'Avatar must be empty or a single emoji character'
+    }
   },
   owner: {
     type: mongoose.Schema.Types.ObjectId,

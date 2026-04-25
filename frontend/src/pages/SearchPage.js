@@ -105,10 +105,19 @@ export const SearchPage = () => {
               {searchResults.map((channel) => (
                 <div key={channel._id} className="card channel-card">
                   <div className="channel-card-top">
-                    <div className="w-16 h-16 channel-avatar rounded-lg flex items-center justify-center flex-shrink-0">
-                      <span className="font-bold text-xl">
-                        {channel.name.charAt(0).toUpperCase()}
-                      </span>
+                    <div className={`w-16 h-16 channel-avatar rounded-lg flex items-center justify-center flex-shrink-0 ${
+                      channel.avatar ? 'is-emoji' : 'is-letter-fallback'
+                    }`}
+                         style={channel.avatar ? {} : { backgroundColor: '#00C9A7' }}>
+                      {channel.avatar ? (
+                        <span className="text-4xl">
+                          {channel.avatar}
+                        </span>
+                      ) : (
+                        <span className="text-white font-bold text-xl">
+                          {channel.name.charAt(0).toUpperCase()}
+                        </span>
+                      )}
                     </div>
                     
                     <div className="flex-1">

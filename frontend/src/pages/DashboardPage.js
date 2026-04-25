@@ -120,10 +120,19 @@ export const DashboardPage = () => {
             {channels.owned.map((channel) => (
               <div key={channel._id} className="card">
                 <div className="flex items-center mb-4">
-                  <div className="w-12 h-12 bg-navy-700 rounded-lg flex items-center justify-center mr-3">
-                    <span className="text-secondary font-bold text-lg">
-                      {channel.name.charAt(0).toUpperCase()}
-                    </span>
+                  <div className={`w-12 h-12 rounded-lg flex items-center justify-center mr-3 ${
+                    channel.avatar ? 'is-emoji' : 'is-letter-fallback'
+                  }`}
+                       style={channel.avatar ? {} : { backgroundColor: '#00C9A7' }}>
+                    {channel.avatar ? (
+                      <span className="text-3xl">
+                        {channel.avatar}
+                      </span>
+                    ) : (
+                      <span className="text-white font-bold text-lg">
+                        {channel.name.charAt(0).toUpperCase()}
+                      </span>
+                    )}
                   </div>
                   <div className="flex-1">
                     <h3 className="card-title text-white">{channel.name}</h3>
@@ -164,10 +173,19 @@ export const DashboardPage = () => {
             {channels.joined.map((channel) => (
               <div key={channel._id} className="card">
                 <div className="flex items-center mb-4">
-                  <div className="w-12 h-12 bg-navy-700 rounded-lg flex items-center justify-center mr-3">
-                    <span className="text-secondary font-bold text-lg">
-                      {channel.name.charAt(0).toUpperCase()}
-                    </span>
+                  <div className={`w-12 h-12 rounded-lg flex items-center justify-center mr-3 ${
+                    channel.avatar ? 'is-emoji' : 'is-letter-fallback'
+                  }`}
+                       style={channel.avatar ? {} : { backgroundColor: '#00C9A7' }}>
+                    {channel.avatar ? (
+                      <span className="text-3xl">
+                        {channel.avatar}
+                      </span>
+                    ) : (
+                      <span className="text-white font-bold text-lg">
+                        {channel.name.charAt(0).toUpperCase()}
+                      </span>
+                    )}
                   </div>
                   <div className="flex-1">
                     <h3 className="card-title text-white">{channel.name}</h3>
