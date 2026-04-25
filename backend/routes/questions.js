@@ -4,6 +4,7 @@ const Question = require('../models/Question');
 const Channel = require('../models/Channel');
 const User = require('../models/User');
 const { auth, optionalAuth } = require('../middleware/auth');
+const { notifyChannelMembers } = require('../utils/pushNotification');
 
 const router = express.Router();
 
@@ -160,6 +161,14 @@ router.post('/', auth, [
     await channel.save();
 
     await question.populate('channel', 'name slug');
+
+    // Send push notification to channel members
+    await notifyChannelMembers(channel._id, {
+      title: '🧠 New Question Posted!',
+      body: question.questionText.substring(0, 100),
+      url: `/q/${question.shareId}`,
+      icon: '/logo.png'
+    });
 
     res.status(201).json(question);
   } catch (error) {

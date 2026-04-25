@@ -1,6 +1,7 @@
 const express = require('express');
 const mongoose = require('mongoose');
 const cors = require('cors');
+const webpush = require('web-push');
 require('dotenv').config();
 
 const app = express();
@@ -13,6 +14,13 @@ app.use(cors({
   credentials: true
 }));
 app.use(express.json());
+
+// Configure web-push
+webpush.setVapidDetails(
+  process.env.VAPID_EMAIL,
+  process.env.VAPID_PUBLIC_KEY,
+  process.env.VAPID_PRIVATE_KEY
+);
 
 // Connect to MongoDB
 mongoose.connect(process.env.MONGODB_URI)
@@ -27,6 +35,7 @@ app.use('/api/auth', require('./routes/auth'));
 app.use('/api/channels', require('./routes/channels'));
 app.use('/api/questions', require('./routes/questions'));
 app.use('/api/submissions', require('./routes/submissions'));
+app.use('/api/notifications', require('./routes/notifications'));
 
 // Start cron jobs
 require('./jobs/autoReveal');

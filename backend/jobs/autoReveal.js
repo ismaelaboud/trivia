@@ -1,6 +1,7 @@
 const cron = require('node-cron');
 const Question = require('../models/Question');
 const ChannelMember = require('../models/ChannelMember');
+const { notifyChannelMembers } = require('../utils/pushNotification');
 
 // Runs every minute
 cron.schedule('* * * * *', async () => {
@@ -18,6 +19,14 @@ cron.schedule('* * * * *', async () => {
     for (const question of questions) {
       // Use the existing revealAnswer method
       await question.revealAnswer();
+
+      // Send push notification to channel members
+      await notifyChannelMembers(question.channel._id, {
+        title: '✅ Answer Revealed!',
+        body: `The answer is: ${question.correctAnswer}`,
+        url: `/q/${question.shareId}`,
+        icon: '/logo.png'
+      });
 
       // Update member scores for all submissions
       for (const submission of question.submissions) {

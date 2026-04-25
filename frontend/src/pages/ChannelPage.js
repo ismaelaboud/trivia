@@ -3,11 +3,17 @@ import { useParams, useNavigate } from 'react-router-dom';
 import { useAuth } from '../contexts/AuthContext';
 import { channelsAPI, questionsAPI, submissionsAPI } from '../services/api';
 import { ShareModal } from '../components/ShareModal';
+import { usePushNotifications } from '../hooks/usePushNotifications';
 
 export const ChannelPage = () => {
   const { slug } = useParams();
   const { isAuthenticated, user } = useAuth();
   const navigate = useNavigate();
+  
+  // Initialize push notifications for this channel
+  const { permission, subscribed, subscribe, unsubscribe } = usePushNotifications(
+    channelData?.channel?._id
+  );
   
   const [channelData, setChannelData] = useState(null);
   const [activeQuestion, setActiveQuestion] = useState(null);
@@ -204,6 +210,35 @@ export const ChannelPage = () => {
               <span>{channelData.channel.members.length} members</span>
               <span>{channelData.channel.totalQuestions} questions</span>
             </div>
+            
+            {/* Notification Bell */}
+            {channelData.isMember && (
+              <div className="mt-4">
+                {!subscribed ? (
+                  <button 
+                    onClick={subscribe}
+                    className="bg-navy-800 border-2 border-teal text-teal px-4 py-2 rounded-lg text-sm font-medium hover:bg-teal hover:text-navy-800 transition-colors flex items-center space-x-2"
+                  >
+                    <span>🔔</span>
+                    <span>Get Notified</span>
+                  </button>
+                ) : (
+                  <button 
+                    onClick={unsubscribe}
+                    className="bg-teal text-navy-800 px-4 py-2 rounded-lg text-sm font-medium hover:bg-teal-600 transition-colors flex items-center space-x-2"
+                  >
+                    <span>🔔</span>
+                    <span>Notified ✓</span>
+                  </button>
+                )}
+                
+                {permission === 'denied' && (
+                  <div className="mt-2 text-xs text-gray-400">
+                    🔕 Notifications blocked - enable in browser settings
+                  </div>
+                )}
+              </div>
+            )}
           </div>
         </div>
 
