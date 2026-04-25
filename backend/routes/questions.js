@@ -7,73 +7,7 @@ const { auth, optionalAuth } = require('../middleware/auth');
 
 const router = express.Router();
 
-// Create question (channel owner only)
-router.post('/', auth, [
-  body('channelSlug').trim().isLength({ min: 1 }).withMessage('Channel slug required'),
-  body('questionText').trim().isLength({ min: 1, max: 500 }).withMessage('Question text required (max 500 chars)'),
-  body('correctAnswer').trim().isLength({ min: 1, max: 200 }).withMessage('Correct answer required (max 200 chars)'),
-  body('revealAt').optional().isISO8601().withMessage('Reveal time must be a valid date')
-], async (req, res) => {
-  try {
-    const errors = validationResult(req);
-    if (!errors.isEmpty()) {
-      return res.status(400).json({ errors: errors.array() });
-    }
-
-    const { channelSlug, questionText, correctAnswer, revealAt } = req.body;
-
-    // Validate that revealAt is a future date if provided
-    if (revealAt && new Date(revealAt) <= new Date()) {
-      return res.status(400).json({ 
-        message: 'Reveal time must be in the future' 
-      });
-    }
-
-    // Find channel
-    const channel = await Channel.findOne({ slug: channelSlug, isActive: true });
-    if (!channel) {
-      return res.status(404).json({ message: 'Channel not found' });
-    }
-
-    // Check if user is owner
-    if (channel.owner.toString() !== req.user.id.toString()) {
-      return res.status(403).json({ message: 'Only channel owner can create questions' });
-    }
-
-    // Check if there's already an active question
-    const activeQuestion = await Question.findOne({
-      channel: channel._id,
-      isActive: true
-    });
-
-    if (activeQuestion) {
-      return res.status(400).json({ message: 'There is already an active question in this channel' });
-    }
-
-    // Create question
-    const question = new Question({
-      channel: channel._id,
-      questionText,
-      correctAnswer,
-      revealAt: revealAt ? new Date(revealAt) : null
-    });
-
-    await question.save();
-
-    // Update channel question count
-    channel.totalQuestions += 1;
-    await channel.save();
-
-    await question.populate('channel', 'name slug');
-
-    res.status(201).json(question);
-  } catch (error) {
-    console.error('Create question error:', error);
-    res.status(500).json({ message: 'Server error' });
-  }
-});
-
-// Get question by shareId (public endpoint)
+// Get question by shareId (public endpoint) - MUST be first to avoid conflicts with :channelSlug routes
 router.get('/share/:shareId', async (req, res) => {
   try {
     const { shareId } = req.params;
@@ -167,6 +101,73 @@ router.post('/:id/submit', optionalAuth, [
     res.status(500).json({ message: 'Server error' });
   }
 });
+
+// Create question (channel owner only)
+router.post('/', auth, [
+  body('channelSlug').trim().isLength({ min: 1 }).withMessage('Channel slug required'),
+  body('questionText').trim().isLength({ min: 1, max: 500 }).withMessage('Question text required (max 500 chars)'),
+  body('correctAnswer').trim().isLength({ min: 1, max: 200 }).withMessage('Correct answer required (max 200 chars)'),
+  body('revealAt').optional().isISO8601().withMessage('Reveal time must be a valid date')
+], async (req, res) => {
+  try {
+    const errors = validationResult(req);
+    if (!errors.isEmpty()) {
+      return res.status(400).json({ errors: errors.array() });
+    }
+
+    const { channelSlug, questionText, correctAnswer, revealAt } = req.body;
+
+    // Validate that revealAt is a future date if provided
+    if (revealAt && new Date(revealAt) <= new Date()) {
+      return res.status(400).json({ 
+        message: 'Reveal time must be in the future' 
+      });
+    }
+
+    // Find channel
+    const channel = await Channel.findOne({ slug: channelSlug, isActive: true });
+    if (!channel) {
+      return res.status(404).json({ message: 'Channel not found' });
+    }
+
+    // Check if user is owner
+    if (channel.owner.toString() !== req.user.id.toString()) {
+      return res.status(403).json({ message: 'Only channel owner can create questions' });
+    }
+
+    // Check if there's already an active question
+    const activeQuestion = await Question.findOne({
+      channel: channel._id,
+      isActive: true
+    });
+
+    if (activeQuestion) {
+      return res.status(400).json({ message: 'There is already an active question in this channel' });
+    }
+
+    // Create question
+    const question = new Question({
+      channel: channel._id,
+      questionText,
+      correctAnswer,
+      revealAt: revealAt ? new Date(revealAt) : null
+    });
+
+    await question.save();
+
+    // Update channel question count
+    channel.totalQuestions += 1;
+    await channel.save();
+
+    await question.populate('channel', 'name slug');
+
+    res.status(201).json(question);
+  } catch (error) {
+    console.error('Create question error:', error);
+    res.status(500).json({ message: 'Server error' });
+  }
+});
+
 
 // Get active question for a channel
 router.get('/:channelSlug/active', optionalAuth, async (req, res) => {
