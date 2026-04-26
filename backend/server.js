@@ -10,11 +10,16 @@ const app = express();
 const server = http.createServer(app);
 const io = new Server(server, {
   cors: {
-    origin: process.env.NODE_ENV === 'production' 
-      ? [process.env.PROD_FRONTEND_URL] 
-      : [process.env.FRONTEND_URL],
-    methods: ['GET', 'POST']
-  }
+    origin: [
+      process.env.PROD_FRONTEND_URL,
+      process.env.FRONTEND_URL,
+      'http://localhost:3000'
+    ],
+    methods: ['GET', 'POST'],
+    credentials: true
+  },
+  transports: ['polling', 'websocket'],
+  allowEIO3: true
 });
 
 // Attach io to app for use in routes
@@ -22,10 +27,15 @@ app.set('io', io);
 
 // Middleware
 app.use(cors({
-  origin: process.env.NODE_ENV === 'production' 
-    ? [process.env.PROD_FRONTEND_URL] 
-    : [process.env.FRONTEND_URL],
-  credentials: true
+  origin: [
+    process.env.PROD_FRONTEND_URL,
+    process.env.FRONTEND_URL,
+    'http://localhost:3000'
+  ],
+  credentials: true,
+  methods: ['GET', 'POST', 'PUT', 'PATCH', 
+            'DELETE', 'OPTIONS'],
+  allowedHeaders: ['Content-Type', 'Authorization']
 }));
 app.use(express.json());
 

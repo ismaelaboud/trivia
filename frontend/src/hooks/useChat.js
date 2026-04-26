@@ -1,7 +1,8 @@
 import { useEffect, useState, useRef } from 'react';
 import { io } from 'socket.io-client';
 
-const API_URL = process.env.REACT_APP_API_URL || 'http://localhost:5000';
+const SOCKET_URL = process.env.REACT_APP_API_URL 
+  || 'https://trivia-tbyq.onrender.com';
 
 export function useChat(channelSlug, userName) {
   const [messages, setMessages] = useState([]);
@@ -11,13 +12,21 @@ export function useChat(channelSlug, userName) {
   
   useEffect(() => {
     // Load message history
-    fetch(`${API_URL}/api/chat/${channelSlug}`)
+    fetch(`${SOCKET_URL}/api/chat/${channelSlug}`)
       .then(r => r.json())
       .then(data => setMessages(data))
       .catch(err => console.error('Error loading chat history:', err));
     
-    // Connect socket
-    const socket = io(API_URL);
+    // Connect socket with proper configuration
+    const socket = io(SOCKET_URL, {
+      transports: ['polling', 'websocket'],
+      withCredentials: true,
+      reconnection: true,
+      reconnectionAttempts: 10,
+      reconnectionDelay: 2000,
+      timeout: 20000
+    });
+    
     socketRef.current = socket;
     
     socket.on('connect', () => {
