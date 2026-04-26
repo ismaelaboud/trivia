@@ -1,6 +1,5 @@
 import { useState, useEffect } from 'react';
-
-const API_URL = process.env.REACT_APP_API_URL || 'http://localhost:5000';
+import { API_URL } from '../config/api';
 
 export function usePushNotifications(channelId) {
   const [permission, setPermission] = useState(
