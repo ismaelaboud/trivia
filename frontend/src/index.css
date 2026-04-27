@@ -558,6 +558,65 @@ html, body {
   display: none;
 }
 
+/* iOS Safari specific fixes */
+@supports (-webkit-touch-callout: none) {
+  /* iOS Safari viewport and scrolling fixes */
+  html, body {
+    -webkit-overflow-scrolling: touch;
+    height: 100%;
+    width: 100%;
+    position: fixed;
+    overflow: hidden;
+  }
+  
+  #root {
+    height: 100vh;
+    width: 100vw;
+    overflow-y: auto;
+    overflow-x: hidden;
+    -webkit-overflow-scrolling: touch;
+    position: relative;
+  }
+  
+  /* Fix flexbox issues on iOS Safari */
+  .channel-page-container {
+    display: -webkit-box;
+    display: -webkit-flex;
+    display: flex;
+    -webkit-flex-direction: column;
+    flex-direction: column;
+    min-height: 100vh;
+  }
+  
+  /* Ensure proper text rendering */
+  .text-white {
+    color: #FFFFFF !important;
+  }
+  
+  .text-teal {
+    color: #00C9A7 !important;
+  }
+  
+  /* Fix button rendering */
+  .btn-primary, .btn-secondary, .btn-outline, .btn-destructive {
+    -webkit-appearance: none;
+    -webkit-tap-highlight-color: transparent;
+    cursor: pointer;
+  }
+  
+  /* Fix input rendering */
+  input, textarea, select {
+    -webkit-appearance: none;
+    border-radius: 0;
+  }
+  
+  /* Fix card rendering */
+  .card {
+    -webkit-transform: translateZ(0);
+    backface-visibility: hidden;
+  }
+}
+
 /* Responsive Breakpoints */
 @media (max-width: 767px) {
   /* Hide two-column grid, show tabbed layout */

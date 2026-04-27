@@ -136,8 +136,8 @@ export const ChannelManagePage = () => {
         </button>
         
         {/* Page Title */}
-        <h1 className="text-white font-unbounded text-xl mb-2">Manage Channel</h1>
-        <p className="text-teal font-plus-jakarta-sans text-xs">{channelData.channel.name}</p>
+        <h1 className="text-white font-heading text-xl mb-2">Manage Channel</h1>
+        <p className="text-teal font-body text-xs">{channelData.channel.name}</p>
       </div>
 
       {error && (
@@ -155,20 +155,20 @@ export const ChannelManagePage = () => {
       {/* Create Question Section */}
       <div className="card mb-3">
         <div className="flex items-center justify-between mb-6">
-          <h2 className="text-white font-unbounded text-lg">Questions</h2>
+          <h2 className="text-white font-heading text-lg">Questions</h2>
           <button 
             onClick={() => setShowCreateForm(!showCreateForm)}
-            className="bg-teal hover:bg-teal-dark text-navy-900 px-3 py-1 rounded transition-colors duration-200 font-plus-jakarta-sans font-semibold text-xs uppercase"
+            className="bg-teal hover:bg-teal-dark text-navy-900 px-3 py-1 rounded transition-colors duration-200 font-body font-semibold text-xs uppercase"
           >
             {showCreateForm ? 'Cancel' : '+ Create'}
           </button>
         </div>
 
         {showCreateForm && (
-          <form onSubmit={handleCreateQuestion} className="bg-gray-50 rounded-lg p-6 mb-6">
+          <form onSubmit={handleCreateQuestion} className="bg-navy-700 rounded-lg p-6 mb-6 border border-teal border-opacity-15">
             <div className="space-y-4">
               <div>
-                <label className="block text-sm font-medium text-gray-700 mb-1">
+                <label className="block text-sm font-medium text-white mb-1">
                   Question Text
                 </label>
                 <textarea
@@ -182,7 +182,7 @@ export const ChannelManagePage = () => {
                 />
               </div>
               <div>
-                <label className="block text-sm font-medium text-gray-700 mb-1">
+                <label className="block text-sm font-medium text-white mb-1">
                   Correct Answer
                 </label>
                 <input
@@ -196,7 +196,7 @@ export const ChannelManagePage = () => {
                 />
               </div>
               <div>
-                <label className="block text-sm font-medium text-gray-700 mb-1">
+                <label className="block text-sm font-medium text-white mb-1">
                   Auto Reveal Date & Time
                 </label>
                 <input
@@ -206,7 +206,7 @@ export const ChannelManagePage = () => {
                   className="input-field"
                   min={new Date(Date.now() + 5 * 60 * 1000).toISOString().slice(0, 16)}
                 />
-                <p className="text-xs text-gray-500 mt-1">
+                <p className="text-xs text-gray-400 mt-1">
                   The answer will reveal automatically at this time. Members will be notified.
                 </p>
               </div>
@@ -289,7 +289,7 @@ export const ChannelManagePage = () => {
                     )}
                     <button
                       onClick={() => handleDeleteQuestion(question._id)}
-                      className="btn-danger text-sm"
+                      className="btn-destructive text-sm"
                     >
                       Delete
                     </button>
@@ -303,18 +303,18 @@ export const ChannelManagePage = () => {
 
       {/* Channel Stats */}
       <div className="card">
-        <h2 className="text-white font-unbounded text-lg mb-4">Channel Statistics</h2>
+        <h2 className="text-white font-heading text-lg mb-4">Channel Statistics</h2>
         <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
           <div className="text-center">
-            <div className="text-3xl font-unbounded font-bold text-yellow mb-2">{channelData.channel.members.length}</div>
+            <div className="text-3xl font-heading font-bold text-yellow mb-2">{channelData.channel.members.length}</div>
             <div className="text-sm text-gray-400">Total Members</div>
           </div>
           <div className="text-center">
-            <div className="text-3xl font-unbounded font-bold text-yellow mb-2">{channelData.channel.totalQuestions}</div>
+            <div className="text-3xl font-heading font-bold text-yellow mb-2">{channelData.channel.totalQuestions}</div>
             <div className="text-sm text-gray-400">Total Questions</div>
           </div>
           <div className="text-center">
-            <div className="text-3xl font-unbounded font-bold text-yellow mb-2">{questions.filter(q => q.isActive).length}</div>
+            <div className="text-3xl font-heading font-bold text-yellow mb-2">{questions.filter(q => q.isActive).length}</div>
             <div className="text-sm text-gray-400">Active Questions</div>
           </div>
         </div>
