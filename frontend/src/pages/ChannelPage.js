@@ -196,7 +196,7 @@ export const ChannelPage = () => {
     <div className="channel-page-container">
       {/* Channel Header */}
       <div className="channel-header card">
-        <div className="flex items-start">
+        <div className="channel-header-top">
           <div className={`w-16 h-16 channel-avatar rounded-lg flex items-center justify-center mr-4 flex-shrink-0 ${
             channelData.channel.avatar ? 'is-emoji' : 'is-letter-fallback'
           }`}
@@ -211,7 +211,7 @@ export const ChannelPage = () => {
               </span>
             )}
           </div>
-          <div className="flex-1">
+          <div className="channel-header-info">
             <div className="flex items-center mb-2">
               {activeQuestion && (
                 <div className="active-indicator mr-2"></div>
@@ -222,10 +222,10 @@ export const ChannelPage = () => {
             {channelData.channel.description && (
               <p className="channel-description mb-4">{channelData.channel.description}</p>
             )}
-            <div className="flex items-center space-x-4 text-sm channel-meta">
-              <span>by {channelData.channel.owner.username}</span>
-              <span>{channelData.channel.members.length} members</span>
-              <span>{channelData.channel.totalQuestions} questions</span>
+            <div className="channel-meta">
+              <span className="channel-owner-name">by {channelData.channel.owner.username}</span>
+              <span className="channel-meta-item">{channelData.channel.members.length} members</span>
+              <span className="channel-meta-item">{channelData.channel.totalQuestions} questions</span>
             </div>
             
             {/* Notification Bell - DISABLED */}
@@ -556,23 +556,26 @@ export const ChannelPage = () => {
               <h2 className="section-heading mb-4">Leaderboard</h2>
               <div className="space-y-3">
                 {channelData.leaderboard.map((entry, index) => (
-                  <div key={entry.user._id} className="flex items-center justify-between py-2 border-b border-navy-700 last:border-0">
-                    <div className="flex items-center">
-                      <span className={`w-8 h-8 rounded-full flex items-center justify-center mr-3 text-sm font-medium leaderboard-rank ${
-                        index === 0 ? 'rank-1' : index === 1 ? 'rank-2' : index === 2 ? 'rank-3' : 'text-secondary'
-                      }`}>
-                        {index + 1}
+                  <div key={entry.user._id} className="leaderboard-row">
+                    <span className={`leaderboard-rank ${
+                      index === 0 ? 'rank-1' : index === 1 ? 'rank-2' : index === 2 ? 'rank-3' : 'text-secondary'
+                    }`}>
+                      {index + 1}
+                    </span>
+                    <div className="leaderboard-avatar bg-navy-700 rounded-full flex items-center justify-center">
+                      <span className="text-secondary text-sm font-medium">
+                        {entry.user.username.charAt(0).toUpperCase()}
                       </span>
-                      <div className="w-8 h-8 bg-navy-700 rounded-full flex items-center justify-center mr-3">
-                        <span className="text-secondary text-sm font-medium">
-                          {entry.user.username.charAt(0).toUpperCase()}
-                        </span>
-                      </div>
-                      <span className="font-medium text-white">{entry.user.username}</span>
                     </div>
-                    <div className="text-right">
-                      <p className="font-semibold text-white">{entry.totalScore} points</p>
-                      <p className="text-sm text-secondary">{entry.correctAnswers}/{entry.questionsAnswered} correct</p>
+                    <div className="leaderboard-user-info">
+                      <span className="leaderboard-username username-display">{entry.user.username}</span>
+                      {user?.username === entry.user.username && (
+                        <span className="leaderboard-you-badge">You</span>
+                      )}
+                    </div>
+                    <div className="leaderboard-score">
+                      <p className="leaderboard-points">{entry.totalScore} points</p>
+                      <p className="leaderboard-correct">{entry.correctAnswers}/{entry.questionsAnswered} correct</p>
                     </div>
                   </div>
                 ))}
@@ -759,30 +762,28 @@ export const ChannelPage = () => {
                 <h2 className="section-heading mb-4">Leaderboard</h2>
                 <div className="space-y-3">
                   {channelData.leaderboard.map((entry, index) => (
-                    <div key={entry.user._id} className={`flex items-center justify-between py-3 border-b border-navy-700 last:border-0 ${
-                      user?.username === entry.user.username ? 'bg-teal bg-opacity-10 rounded-lg px-3 -mx-3' : ''
+                    <div key={entry.user._id} className={`leaderboard-row ${
+                      user?.username === entry.user.username ? 'bg-teal bg-opacity-10 rounded-lg' : ''
                     }`}>
-                      <div className="flex items-center">
-                        <span className={`w-10 h-10 rounded-full flex items-center justify-center mr-4 text-sm font-medium leaderboard-rank ${
-                          index === 0 ? 'rank-1' : index === 1 ? 'rank-2' : index === 2 ? 'rank-3' : 'text-secondary'
-                        }`}>
-                          {index + 1}
+                      <span className={`leaderboard-rank ${
+                        index === 0 ? 'rank-1' : index === 1 ? 'rank-2' : index === 2 ? 'rank-3' : 'text-secondary'
+                      }`}>
+                        {index + 1}
+                      </span>
+                      <div className="leaderboard-avatar bg-navy-700 rounded-full flex items-center justify-center">
+                        <span className="text-secondary text-sm font-medium">
+                          {entry.user.username.charAt(0).toUpperCase()}
                         </span>
-                        <div className="w-10 h-10 bg-navy-700 rounded-full flex items-center justify-center mr-4">
-                          <span className="text-secondary text-sm font-medium">
-                            {entry.user.username.charAt(0).toUpperCase()}
-                          </span>
-                        </div>
-                        <div>
-                          <span className="font-medium text-white block">{entry.user.username}</span>
-                          {user?.username === entry.user.username && (
-                            <span className="text-xs text-teal">You</span>
-                          )}
-                        </div>
                       </div>
-                      <div className="text-right">
-                        <p className="font-semibold text-white">{entry.totalScore} points</p>
-                        <p className="text-sm text-secondary">{entry.correctAnswers}/{entry.questionsAnswered} correct</p>
+                      <div className="leaderboard-user-info">
+                        <span className="leaderboard-username username-display">{entry.user.username}</span>
+                        {user?.username === entry.user.username && (
+                          <span className="leaderboard-you-badge">You</span>
+                        )}
+                      </div>
+                      <div className="leaderboard-score">
+                        <p className="leaderboard-points">{entry.totalScore} points</p>
+                        <p className="leaderboard-correct">{entry.correctAnswers}/{entry.questionsAnswered} correct</p>
                       </div>
                     </div>
                   ))}

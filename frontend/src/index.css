@@ -161,6 +161,80 @@ code {
   letter-spacing: -0.5px;
 }
 
+/* Leaderboard card overflow fixes */
+.leaderboard-row {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 12px;
+  width: 100%;
+  box-sizing: border-box;
+  overflow: hidden;
+}
+
+/* Rank number */
+.leaderboard-rank {
+  font-family: 'Unbounded', sans-serif;
+  font-size: 14px;
+  width: 20px;
+  flex-shrink: 0;
+}
+
+/* Avatar circle */
+.leaderboard-avatar {
+  width: 32px;
+  height: 32px;
+  border-radius: 50%;
+  flex-shrink: 0;
+}
+
+/* Name + You label — takes available space */
+.leaderboard-user-info {
+  flex: 1;
+  min-width: 0;
+  overflow: hidden;
+}
+
+.leaderboard-username {
+  font-size: 13px;
+  font-weight: 600;
+  color: #fff;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.leaderboard-you-badge {
+  font-size: 11px;
+  color: #FFE66D;
+}
+
+/* Points + correct — right side, never wraps */
+.leaderboard-score {
+  flex-shrink: 0;
+  text-align: right;
+}
+
+.leaderboard-points {
+  font-family: 'Unbounded', sans-serif;
+  font-size: 13px;
+  color: #fff;
+  white-space: nowrap;
+}
+
+.leaderboard-correct {
+  font-size: 11px;
+  color: #A8B8C8;
+  white-space: nowrap;
+}
+
+/* On leaderboard specifically */
+@media (max-width: 767px) {
+  .leaderboard-username {
+    max-width: 120px;
+  }
+}
+
 /* Global text color fixes for navy background */
 p, span, label, li, td, th, small {
   color: #A8B8C8;
@@ -194,6 +268,65 @@ a {
 /* Channel meta — "by thegoat · 1 members · 1 questions" */
 .channel-meta, .channel-meta span {
   color: #A8B8C8;
+}
+
+/* Channel header meta row fixes */
+.channel-meta {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px 12px;
+  font-size: 12px;
+  color: #A8B8C8;
+}
+
+.channel-meta-item {
+  white-space: nowrap;
+}
+
+/* Truncate long owner names/emails */
+.channel-owner-name {
+  max-width: 140px;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  display: inline-block;
+  vertical-align: bottom;
+}
+
+/* Global rule for all user display names */
+.username-display {
+  max-width: 180px;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  display: inline-block;
+}
+
+/* Channel header avatar + name row */
+.channel-header-top {
+  display: flex;
+  align-items: flex-start;
+  gap: 12px;
+  width: 100%;
+  overflow: hidden;
+}
+
+.channel-header-info {
+  flex: 1;
+  min-width: 0;
+}
+
+.channel-name {
+  font-family: 'Unbounded', sans-serif;
+  font-size: 16px;
+  color: #fff;
+  word-break: break-word;
+}
+
+.channel-slug {
+  font-size: 13px;
+  color: #00C9A7;
+  word-break: break-all;
 }
 
 /* Channel avatar/icon */
@@ -255,6 +388,31 @@ html, body {
 
 *, *::before, *::after {
   box-sizing: border-box;
+}
+
+/* All cards on mobile */
+@media (max-width: 767px) {
+  .card, 
+  .leaderboard-card,
+  .channel-header-card,
+  .question-card {
+    width: 100%;
+    margin: 0;
+    border-radius: 10px;
+    overflow: hidden;
+  }
+  
+  /* Page wrapper */
+  .channel-page {
+    padding: 12px;
+    width: 100%;
+    overflow-x: hidden;
+  }
+  
+  /* Section headings */
+  h1, h2, h3 {
+    word-break: break-word;
+  }
 }
 
 /* Discover page container */
@@ -468,23 +626,32 @@ html, body {
   z-index: 10;
   margin: 0 -20px;
   padding: 0 20px;
+  overflow-x: auto;
+  scrollbar-width: none;
+  -webkit-overflow-scrolling: touch;
+}
+
+.tab-bar::-webkit-scrollbar {
+  display: none;
 }
 
 .tab-item {
   flex: 1;
+  min-width: 70px;
   display: flex;
   flex-direction: column;
   align-items: center;
   text-align: center;
-  padding: 12px 4px;
+  padding: 10px 4px;
   font-family: 'Plus Jakarta Sans', sans-serif;
-  font-size: 12px;
+  font-size: 11px;
   font-weight: 600;
   color: #A8B8C8;
   cursor: pointer;
   border-bottom: 2px solid transparent;
   transition: all 0.2s;
   position: relative;
+  white-space: nowrap;
 }
 
 .tab-item:hover {
