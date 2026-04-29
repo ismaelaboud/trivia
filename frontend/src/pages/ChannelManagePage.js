@@ -121,9 +121,7 @@ export const ChannelManagePage = () => {
   }
 
   return (
-    <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
-      {/* Add mobile-specific padding */}
-      <div className="px-4 sm:px-0">
+    <div className="manage-channel-page">
       {/* Header */}
       <div className="mb-8">
         {/* Back Arrow */}
@@ -147,20 +145,20 @@ export const ChannelManagePage = () => {
       )}
 
       {success && (
-        <div className="bg-green-50 border border-green-200 text-green-600 px-4 py-3 rounded-lg mb-6">
+        <div className="success-banner mb-6">
           {success}
         </div>
       )}
 
       {/* Create Question Section */}
       <div className="card mb-3">
-        <div className="flex items-center justify-between mb-6">
-          <h2 className="text-white font-heading text-lg">Questions</h2>
+        <div className="questions-section-header">
+          <h2 className="questions-heading">Questions</h2>
           <button 
             onClick={() => setShowCreateForm(!showCreateForm)}
-            className="bg-teal hover:bg-teal-dark text-navy-900 px-3 py-1 rounded transition-colors duration-200 font-body font-semibold text-xs uppercase"
+            className="create-question-btn"
           >
-            {showCreateForm ? 'Cancel' : '+ Create'}
+            {showCreateForm ? 'Cancel' : '+ CREATE'}
           </button>
         </div>
 
@@ -241,41 +239,41 @@ export const ChannelManagePage = () => {
             </div>
           ) : (
             questions.map((question) => (
-              <div key={question._id} className="border border-gray-200 rounded-lg p-4">
-                <div className="flex items-start justify-between">
-                  <div className="flex-1">
-                    <p className="font-medium text-gray-900 mb-2">{question.questionText}</p>
-                    <p className="text-sm text-gray-600 mb-2">
-                      <span className="font-medium">Answer:</span> {question.correctAnswer}
-                    </p>
-                    <div className="flex items-center space-x-4 text-sm text-gray-500">
-                      <span>{question.submissions?.length || 0} submissions</span>
-                      {question.isActive && (
-                        <span className="bg-green-100 text-green-800 px-2 py-1 rounded-full text-xs">
-                          Active
-                        </span>
-                      )}
-                      {question.isRevealed && (
-                        <span className="bg-blue-100 text-blue-800 px-2 py-1 rounded-full text-xs">
-                          Revealed
-                        </span>
-                      )}
-                    </div>
-                  </div>
-                  <div className="flex space-x-2 ml-4">
+              <div key={question._id} className="question-card">
+                <div className="question-card-inner">
+                  <div className="question-card-top">
+                    <p className="question-text">{question.questionText}</p>
                     {question.isActive && (
                       <button
                         onClick={() => {
                           setSelectedQuestionForShare(question);
                           setShowShareModal(true);
                         }}
-                        className="bg-navy-700 hover:bg-navy-600 text-teal-400 px-3 py-2 rounded-lg text-sm font-medium transition-colors flex items-center space-x-1"
+                        className="share-btn"
                         title="Share question"
                       >
-                        <span>📤</span>
-                        <span>Share</span>
+                        📤 Share
                       </button>
                     )}
+                  </div>
+                  
+                  <div className="question-answer">
+                    <span>Answer:</span> <span className="question-answer-value">{question.correctAnswer}</span>
+                  </div>
+                  
+                  <div className="question-card-footer">
+                    <span className="submissions-count">{question.submissions?.length || 0} submissions</span>
+                    <div className="flex gap-2">
+                      {question.isActive && (
+                        <span className="status-badge active">Active</span>
+                      )}
+                      {question.isRevealed && (
+                        <span className="status-badge revealed">Revealed</span>
+                      )}
+                    </div>
+                  </div>
+                  
+                  <div className="flex gap-2 mt-3">
                     {!question.isActive && !question.isRevealed && (
                       <button
                         onClick={() => questionsAPI.activate(question._id).then(() => {
@@ -302,20 +300,20 @@ export const ChannelManagePage = () => {
       </div>
 
       {/* Channel Stats */}
-      <div className="card">
-        <h2 className="text-white font-heading text-lg mb-4">Channel Statistics</h2>
+      <div className="channel-stats">
+        <h2>Channel Statistics</h2>
         <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
           <div className="text-center">
-            <div className="text-3xl font-heading font-bold text-yellow mb-2">{channelData.channel.members.length}</div>
-            <div className="text-sm text-gray-400">Total Members</div>
+            <div className="stat-value">{channelData.channel.members.length}</div>
+            <div className="stat-label">Total Members</div>
           </div>
           <div className="text-center">
-            <div className="text-3xl font-heading font-bold text-yellow mb-2">{channelData.channel.totalQuestions}</div>
-            <div className="text-sm text-gray-400">Total Questions</div>
+            <div className="stat-value">{channelData.channel.totalQuestions}</div>
+            <div className="stat-label">Total Questions</div>
           </div>
           <div className="text-center">
-            <div className="text-3xl font-heading font-bold text-yellow mb-2">{questions.filter(q => q.isActive).length}</div>
-            <div className="text-sm text-gray-400">Active Questions</div>
+            <div className="stat-value">{questions.filter(q => q.isActive).length}</div>
+            <div className="stat-label">Active Questions</div>
           </div>
         </div>
       </div>
@@ -327,7 +325,6 @@ export const ChannelManagePage = () => {
         shareId={selectedQuestionForShare?.shareId}
         questionText={selectedQuestionForShare?.questionText}
       />
-      </div>
     </div>
   );
 };
