@@ -3,7 +3,7 @@ import { useParams, useNavigate } from 'react-router-dom';
 import { useAuth } from '../contexts/AuthContext';
 import { channelsAPI, questionsAPI, submissionsAPI } from '../services/api';
 import { ShareModal } from '../components/ShareModal';
-import { usePushNotifications } from '../hooks/usePushNotifications';
+// import { usePushNotifications } from '../hooks/usePushNotifications';
 import ChatBox from '../components/ChatBox';
 
 export const ChannelPage = () => {
@@ -30,9 +30,9 @@ export const ChannelPage = () => {
   const [hasUnreadMessages, setHasUnreadMessages] = useState(false);
 
   // Initialize push notifications for this channel
-  const { permission, subscribed, isSupported, isIOS, error: pushError, subscribe, unsubscribe } = usePushNotifications(
-    channelData?.channel?._id
-  );
+  // const { permission, subscribed, isSupported, isIOS, error: pushError, subscribe, unsubscribe } = usePushNotifications(
+  //   channelData?.channel?._id
+  // );
 
   // Set default tab based on active question
   useEffect(() => {
@@ -228,8 +228,8 @@ export const ChannelPage = () => {
               <span>{channelData.channel.totalQuestions} questions</span>
             </div>
             
-            {/* Notification Bell */}
-            {channelData.isMember && (
+            {/* Notification Bell - DISABLED */}
+            {/* {channelData.isMember && (
               <div className="mt-4">
                 {!isSupported ? (
                   <div className="text-center">
@@ -282,7 +282,7 @@ export const ChannelPage = () => {
                   </div>
                 )}
               </div>
-            )}
+            )} */}
           </div>
         </div>
 
