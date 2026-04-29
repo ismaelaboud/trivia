@@ -30,7 +30,7 @@ export const ChannelPage = () => {
   const [hasUnreadMessages, setHasUnreadMessages] = useState(false);
 
   // Initialize push notifications for this channel
-  const { permission, subscribed, subscribe, unsubscribe } = usePushNotifications(
+  const { permission, subscribed, isSupported, isIOS, error: pushError, subscribe, unsubscribe } = usePushNotifications(
     channelData?.channel?._id
   );
 
@@ -231,7 +231,28 @@ export const ChannelPage = () => {
             {/* Notification Bell */}
             {channelData.isMember && (
               <div className="mt-4">
-                {!subscribed ? (
+                {!isSupported ? (
+                  <div className="text-center">
+                    <div className="bg-gray-700 border border-gray-600 text-gray-300 px-4 py-3 rounded-lg text-sm">
+                      <div className="flex items-center justify-center space-x-2 mb-2">
+                        <span>🔕</span>
+                        <span className="font-medium">Notifications Unavailable</span>
+                      </div>
+                      {isIOS && (
+                        <div className="text-xs text-gray-400 space-y-1">
+                          <div>• iOS 16.4+ required for push notifications</div>
+                          <div>• Add this app to your home screen</div>
+                          <div>• Open app from home screen to enable</div>
+                        </div>
+                      )}
+                      {pushError && (
+                        <div className="text-xs text-yellow-400 mt-2">
+                          {pushError}
+                        </div>
+                      )}
+                    </div>
+                  </div>
+                ) : !subscribed ? (
                   <button 
                     onClick={subscribe}
                     className="bg-navy-800 border-2 border-teal text-teal px-4 py-2 rounded-lg text-sm font-medium hover:bg-teal hover:text-navy-800 transition-colors flex items-center space-x-2"
@@ -249,9 +270,15 @@ export const ChannelPage = () => {
                   </button>
                 )}
                 
-                {permission === 'denied' && (
+                {permission === 'denied' && isSupported && (
                   <div className="mt-2 text-xs text-gray-400">
                     🔕 Notifications blocked - enable in browser settings
+                  </div>
+                )}
+                
+                {pushError && isSupported && (
+                  <div className="mt-2 text-xs text-yellow-400">
+                    ⚠️ {pushError}
                   </div>
                 )}
               </div>
