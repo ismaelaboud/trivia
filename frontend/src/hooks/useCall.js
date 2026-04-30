@@ -74,6 +74,9 @@ export function useCall(channelSlug, isOwner, socket) {
       if (data.roomUrl) {
         setCallActive(true);
         setRoomUrl(data.roomUrl);
+        setStartedBy('You');
+        // Auto-join owner immediately after starting
+        setTimeout(() => joinCall(), 100);
       }
     } catch (err) {
       console.error('Error starting call:', err);
