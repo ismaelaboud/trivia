@@ -54,7 +54,11 @@ const ChatBox = ({ channelSlug, userName }) => {
         {messages.map((message, index) => (
           <div key={message._id || index}>
             {message.type === 'system' ? (
-              <div className="text-center italic text-secondary text-xs">
+              <div className={`text-center italic text-xs ${
+                message.isCallAlert 
+                  ? 'chat-call-alert' 
+                  : 'text-secondary'
+              }`}>
                 {message.text}
               </div>
             ) : (

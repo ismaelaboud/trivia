@@ -10,6 +10,7 @@
     "eject": "react-scripts eject"
   },
   "dependencies": {
+    "@daily-co/daily-js": "^0.89.1",
     "autoprefixer": "^10.4.15",
     "axios": "^1.5.0",
     "lucide-react": "^1.11.0",

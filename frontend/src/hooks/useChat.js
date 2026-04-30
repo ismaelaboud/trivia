@@ -52,6 +52,15 @@ export function useChat(channelSlug, userName) {
       }]);
     });
     
+    socket.on('call_started', ({ startedBy }) => {
+      setMessages(prev => [...prev, {
+        type: 'system',
+        text: `🎙️ ${startedBy} started a live call — Join Now`,
+        timestamp: new Date(),
+        isCallAlert: true
+      }]);
+    });
+    
     socket.on('disconnect', () => {
       setConnected(false);
     });

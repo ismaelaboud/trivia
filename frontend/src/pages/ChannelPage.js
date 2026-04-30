@@ -1,15 +1,18 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import { useAuth } from '../contexts/AuthContext';
 import { channelsAPI, questionsAPI, submissionsAPI } from '../services/api';
 import { ShareModal } from '../components/ShareModal';
 // import { usePushNotifications } from '../hooks/usePushNotifications';
 import ChatBox from '../components/ChatBox';
+import CallBar from '../components/CallBar';
+import { useSocket } from '../contexts/SocketContext';
 
 export const ChannelPage = () => {
   const { slug } = useParams();
   const { isAuthenticated, user } = useAuth();
   const navigate = useNavigate();
+  const { socket } = useSocket();
   
   const [channelData, setChannelData] = useState(null);
   const [activeQuestion, setActiveQuestion] = useState(null);
@@ -295,6 +298,15 @@ export const ChannelPage = () => {
           </div>
         )}
       </div>
+
+      {/* Call Bar - Voice/Video Calling */}
+      {channelData.isMember && (
+        <CallBar 
+          channelSlug={channelData.channel.slug}
+          isOwner={channelData.isOwner}
+          socket={socket}
+        />
+      )}
 
       {/* Mobile Tab Bar */}
       <div className="tab-bar">

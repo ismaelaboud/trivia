@@ -61,6 +61,7 @@ app.use('/api/questions', require('./routes/questions'));
 app.use('/api/submissions', require('./routes/submissions'));
 app.use('/api/notifications', require('./routes/notifications'));
 app.use('/api/chat', require('./routes/chat'));
+app.use('/api/calls', require('./routes/calls'));
 
 // Socket.io events
 const Channel = require('./models/Channel');
@@ -109,6 +110,21 @@ io.on('connection', (socket) => {
       senderInitial: message.senderInitial,
       text: message.text,
       createdAt: message.createdAt
+    });
+  });
+  
+  // Call events
+  socket.on('call_joined', ({ channelSlug, userName }) => {
+    io.to(channelSlug).emit('participant_joined', {
+      userName,
+      timestamp: new Date()
+    });
+  });
+  
+  socket.on('call_left', ({ channelSlug, userName }) => {
+    io.to(channelSlug).emit('participant_left', {
+      userName,
+      timestamp: new Date()
     });
   });
   
