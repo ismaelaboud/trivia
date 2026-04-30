@@ -6,27 +6,12 @@ export default function CallBar({
 }) {
   const {
     callActive, inCall, participants,
-    startedBy, callContainerRef,
-    startCall, joinCall, leaveCall, endCall
+    startedBy, startCall,
+    joinCall, leaveCall, endCall
   } = useCall(channelSlug, isOwner, socket);
 
   return (
     <div className="call-bar">
-      
-      {/* ALWAYS in DOM — never conditionally 
-          rendered — Daily.co iframe lives here */}
-      <div
-        ref={callContainerRef}
-        style={{
-          display: inCall ? 'block' : 'none',
-          width: '100%',
-          height: inCall ? '420px' : '0px',
-          borderRadius: '10px',
-          overflow: 'hidden',
-          background: '#0D1B2A',
-          marginTop: inCall ? '12px' : '0'
-        }}
-      />
       
       {/* State A: No call, owner */}
       {!callActive && isOwner && (

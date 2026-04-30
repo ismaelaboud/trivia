@@ -1,5 +1,4 @@
-import { useState, useEffect, useRef } from 'react';
-import DailyIframe from '@daily-co/daily-js';
+import { useState, useEffect } from 'react';
 import { API_URL } from '../config/api';
 
 export function useCall(channelSlug, isOwner, socket) {
@@ -7,9 +6,7 @@ export function useCall(channelSlug, isOwner, socket) {
   const [roomUrl, setRoomUrl] = useState(null);
   const [inCall, setInCall] = useState(false);
   const [participants, setParticipants] = useState(0);
-  const [callFrame, setCallFrame] = useState(null);
   const [startedBy, setStartedBy] = useState(null);
-  const callContainerRef = useRef(null);
   
   // Check for active call on mount
   useEffect(() => {
@@ -40,7 +37,6 @@ export function useCall(channelSlug, isOwner, socket) {
       setRoomUrl(null);
       setInCall(false);
       setStartedBy(null);
-      if (callFrame) callFrame.destroy();
     });
     
     socket.on('participant_joined', () => {
@@ -57,7 +53,7 @@ export function useCall(channelSlug, isOwner, socket) {
       socket.off('participant_joined');
       socket.off('participant_left');
     };
-  }, [socket, callFrame]);
+  }, [socket]);
   
   const startCall = async () => {
     try {
@@ -93,60 +89,14 @@ export function useCall(channelSlug, isOwner, socket) {
   };
   
   const joinCallWithUrl = async (url) => {
-    try {
-      if (!callContainerRef.current) {
-        console.error('Container ref is null');
-        return;
-      }
-      
-      // Destroy any existing frame first
-      if (callFrame) {
-        callFrame.destroy();
-        setCallFrame(null);
-      }
-      
-      const frame = DailyIframe.createFrame(
-        callContainerRef.current,
-        {
-          iframeStyle: {
-            width: '100%',
-            height: '100%',
-            border: 'none',
-            borderRadius: '10px'
-          },
-          showLeaveButton: true,
-          showFullscreenButton: true,
-          theme: {
-            colors: {
-              accent: '#00C9A7',
-              accentText: '#0D1B2A',
-              background: '#112236',
-              backgroundAccent: '#162D44',
-              baseText: '#FFFFFF',
-            }
-          }
-        }
-      );
-      
-      await frame.join({ url });
-      setCallFrame(frame);
-      setInCall(true);
-      
-      frame.on('left-meeting', () => {
-        setInCall(false);
-        frame.destroy();
-        setCallFrame(null);
-      });
-      
-      frame.on('error', (err) => {
-        console.error('Daily frame error:', err);
-      });
-      
-      // Notify others via socket
-      socket?.emit('call_joined', { channelSlug });
-    } catch (err) {
-      console.error('Join call failed:', err);
+    if (!url) {
+      console.error('No call URL available');
+      return;
     }
+    // Open Daily.co room in new tab
+    window.open(url, '_blank');
+    setInCall(true);
+    socket?.emit('call_joined', { channelSlug });
   };
   
   const joinCall = async () => {
@@ -154,11 +104,6 @@ export function useCall(channelSlug, isOwner, socket) {
   };
   
   const leaveCall = async () => {
-    if (callFrame) {
-      await callFrame.leave();
-      callFrame.destroy();
-      setCallFrame(null);
-    }
     setInCall(false);
     socket?.emit('call_left', { channelSlug });
   };
@@ -174,11 +119,6 @@ export function useCall(channelSlug, isOwner, socket) {
         },
         body: JSON.stringify({ channelSlug })
       });
-      if (callFrame) {
-        await callFrame.leave();
-        callFrame.destroy();
-        setCallFrame(null);
-      }
       setInCall(false);
       setCallActive(false);
       setRoomUrl(null);
@@ -193,7 +133,6 @@ export function useCall(channelSlug, isOwner, socket) {
     inCall,
     participants,
     startedBy,
-    callContainerRef,
     startCall,
     joinCall,
     leaveCall,
