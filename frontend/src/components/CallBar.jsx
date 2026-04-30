@@ -14,10 +14,27 @@ export default function CallBar({ channelSlug, isOwner, socket }) {
     endCall
   } = useCall(channelSlug, isOwner, socket);
 
+  // Always render the container div in the DOM
+  const renderCallContainer = () => (
+    <div
+      ref={callContainerRef}
+      style={{
+        display: inCall ? 'block' : 'none',
+        width: '100%',
+        height: inCall ? '420px' : '0px',
+        borderRadius: '10px',
+        overflow: 'hidden',
+        background: '#0D1B2A',
+        marginTop: inCall ? '12px' : '0'
+      }}
+    />
+  );
+
   // State A: No active call + user is OWNER
   if (!callActive && isOwner) {
     return (
       <div className="call-bar">
+        {renderCallContainer()}
         <div style={{ 
           display: 'flex', 
           alignItems: 'center', 
@@ -49,8 +66,7 @@ export default function CallBar({ channelSlug, isOwner, socket }) {
   if (callActive && !inCall && !isOwner) {
     return (
       <div className="call-bar">
-        {/* Hidden call frame container for joining */}
-        <div className="call-frame-container" ref={callContainerRef} style={{ height: '0', overflow: 'hidden' }}></div>
+        {renderCallContainer()}
         <div style={{ 
           display: 'flex', 
           alignItems: 'center', 
@@ -100,9 +116,7 @@ export default function CallBar({ channelSlug, isOwner, socket }) {
   if (callActive && inCall && !isOwner) {
     return (
       <div className="call-bar">
-        <div className="call-frame-container" ref={callContainerRef}>
-          {/* Daily.co iframe will be rendered here */}
-        </div>
+        {renderCallContainer()}
         <div style={{ 
           marginTop: '12px',
           display: 'flex',
@@ -123,8 +137,7 @@ export default function CallBar({ channelSlug, isOwner, socket }) {
   if (callActive && !inCall && isOwner) {
     return (
       <div className="call-bar">
-        {/* Hidden call frame container for auto-join */}
-        <div className="call-frame-container" ref={callContainerRef} style={{ height: '0', overflow: 'hidden' }}></div>
+        {renderCallContainer()}
         <div style={{ 
           display: 'flex', 
           alignItems: 'center', 
@@ -176,9 +189,7 @@ export default function CallBar({ channelSlug, isOwner, socket }) {
   if (callActive && inCall && isOwner) {
     return (
       <div className="call-bar">
-        <div className="call-frame-container" ref={callContainerRef}>
-          {/* Daily.co iframe will be rendered here */}
-        </div>
+        {renderCallContainer()}
         <div style={{ 
           marginTop: '12px',
           display: 'flex',
@@ -196,5 +207,9 @@ export default function CallBar({ channelSlug, isOwner, socket }) {
   }
 
   // Default: No active call + user is member
-  return null;
+  return (
+    <div className="call-bar">
+      {renderCallContainer()}
+    </div>
+  );
 }

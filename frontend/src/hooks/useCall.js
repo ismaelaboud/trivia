@@ -60,33 +60,51 @@ export function useCall(channelSlug, isOwner, socket) {
   }, [socket, callFrame]);
   
   const startCall = async () => {
-    const token = localStorage.getItem('token');
     try {
-      const res = await fetch(`${API_URL}/api/calls/start`, {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-          Authorization: `Bearer ${token}` 
-        },
-        body: JSON.stringify({ channelSlug })
-      });
+      const token = localStorage.getItem('token');
+      const res = await fetch(
+        `${API_URL}/api/calls/start`,
+        {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+            Authorization: `Bearer ${token}` 
+          },
+          body: JSON.stringify({ channelSlug })
+        }
+      );
       const data = await res.json();
+      
       if (data.roomUrl) {
         setCallActive(true);
         setRoomUrl(data.roomUrl);
         setStartedBy('You');
-        // Auto-join owner immediately after starting
-        setTimeout(() => joinCall(), 100);
+        
+        // KEY FIX: directly join using the URL 
+        // returned from API — do NOT rely on 
+        // state since setRoomUrl is async and 
+        // roomUrl state won't be updated yet
+        // when joinCall() runs
+        await joinCallWithUrl(data.roomUrl);
       }
     } catch (err) {
-      console.error('Error starting call:', err);
+      console.error('Start call failed:', err);
     }
   };
   
-  const joinCall = async () => {
-    if (!roomUrl || !callContainerRef.current) return;
-    
+  const joinCallWithUrl = async (url) => {
     try {
+      if (!callContainerRef.current) {
+        console.error('Container ref is null');
+        return;
+      }
+      
+      // Destroy any existing frame first
+      if (callFrame) {
+        callFrame.destroy();
+        setCallFrame(null);
+      }
+      
       const frame = DailyIframe.createFrame(
         callContainerRef.current,
         {
@@ -105,13 +123,12 @@ export function useCall(channelSlug, isOwner, socket) {
               background: '#112236',
               backgroundAccent: '#162D44',
               baseText: '#FFFFFF',
-              border: 'rgba(0,201,167,0.2)',
             }
           }
         }
       );
       
-      await frame.join({ url: roomUrl });
+      await frame.join({ url });
       setCallFrame(frame);
       setInCall(true);
       
@@ -121,11 +138,19 @@ export function useCall(channelSlug, isOwner, socket) {
         setCallFrame(null);
       });
       
+      frame.on('error', (err) => {
+        console.error('Daily frame error:', err);
+      });
+      
       // Notify others via socket
       socket?.emit('call_joined', { channelSlug });
     } catch (err) {
-      console.error('Error joining call:', err);
+      console.error('Join call failed:', err);
     }
+  };
+  
+  const joinCall = async () => {
+    await joinCallWithUrl(roomUrl);
   };
   
   const leaveCall = async () => {
