@@ -1,56 +1,37 @@
 import React from 'react';
 import { useCall } from '../hooks/useCall';
 
-export default function CallBar({ channelSlug, isOwner, socket }) {
+export default function CallBar({ 
+  channelSlug, isOwner, socket 
+}) {
   const {
-    callActive,
-    inCall,
-    participants,
-    startedBy,
-    callContainerRef,
-    startCall,
-    joinCall,
-    leaveCall,
-    endCall
+    callActive, inCall, participants,
+    startedBy, callContainerRef,
+    startCall, joinCall, leaveCall, endCall
   } = useCall(channelSlug, isOwner, socket);
 
-  // Always render the container div in the DOM
-  const renderCallContainer = () => (
-    <div
-      ref={callContainerRef}
-      style={{
-        display: inCall ? 'block' : 'none',
-        width: '100%',
-        height: inCall ? '420px' : '0px',
-        borderRadius: '10px',
-        overflow: 'hidden',
-        background: '#0D1B2A',
-        marginTop: inCall ? '12px' : '0'
-      }}
-    />
-  );
-
-  // State A: No active call + user is OWNER
-  if (!callActive && isOwner) {
-    return (
-      <div className="call-bar">
-        {renderCallContainer()}
-        <div style={{ 
-          display: 'flex', 
-          alignItems: 'center', 
-          justifyContent: 'space-between',
-          gap: '12px'
-        }}>
-          <div style={{ 
-            display: 'flex', 
-            alignItems: 'center', 
-            gap: '8px',
-            color: '#fff',
-            fontSize: '14px',
-            fontWeight: '500'
-          }}>
-            🎙️ Start a voice call
-          </div>
+  return (
+    <div className="call-bar">
+      
+      {/* ALWAYS in DOM — never conditionally 
+          rendered — Daily.co iframe lives here */}
+      <div
+        ref={callContainerRef}
+        style={{
+          display: inCall ? 'block' : 'none',
+          width: '100%',
+          height: inCall ? '420px' : '0px',
+          borderRadius: '10px',
+          overflow: 'hidden',
+          background: '#0D1B2A',
+          marginTop: inCall ? '12px' : '0'
+        }}
+      />
+      
+      {/* State A: No call, owner */}
+      {!callActive && isOwner && (
+        <div className="call-bar-row">
+          <span>🎙️ Start a voice call</span>
           <button 
             onClick={startCall}
             className="start-call-btn"
@@ -58,45 +39,21 @@ export default function CallBar({ channelSlug, isOwner, socket }) {
             Start Call
           </button>
         </div>
-      </div>
-    );
-  }
-
-  // State B: Active call + user is MEMBER (not in call)
-  if (callActive && !inCall && !isOwner) {
-    return (
-      <div className="call-bar">
-        {renderCallContainer()}
-        <div style={{ 
-          display: 'flex', 
-          alignItems: 'center', 
-          justifyContent: 'space-between',
-          gap: '12px'
-        }}>
-          <div style={{ 
-            display: 'flex', 
-            alignItems: 'center', 
-            gap: '8px'
-          }}>
+      )}
+      
+      {/* State B: Call active, member not in call */}
+      {callActive && !inCall && !isOwner && (
+        <div className="call-bar-row">
+          <div className="call-bar-left">
             <span className="live-badge">
-              <span className="live-dot"></span>
+              <span className="live-dot" />
               LIVE
             </span>
-            <span style={{ 
-              color: '#fff',
-              fontSize: '14px',
-              fontWeight: '500'
-            }}>
+            <span className="call-info">
               {startedBy} is calling
             </span>
             {participants > 0 && (
-              <span style={{ 
-                color: '#8892A0',
-                fontSize: '13px',
-                display: 'flex',
-                alignItems: 'center',
-                gap: '4px'
-              }}>
+              <span className="participants-count">
                 👥 {participants} in call
               </span>
             )}
@@ -108,20 +65,12 @@ export default function CallBar({ channelSlug, isOwner, socket }) {
             Join Call
           </button>
         </div>
-      </div>
-    );
-  }
-
-  // State C: User is IN the call (member)
-  if (callActive && inCall && !isOwner) {
-    return (
-      <div className="call-bar">
-        {renderCallContainer()}
-        <div style={{ 
-          marginTop: '12px',
-          display: 'flex',
-          justifyContent: 'center'
-        }}>
+      )}
+      
+      {/* State C: Member in call */}
+      {inCall && !isOwner && (
+        <div className="call-bar-row" 
+          style={{ justifyContent: 'center' }}>
           <button 
             onClick={leaveCall}
             className="end-call-btn"
@@ -129,72 +78,25 @@ export default function CallBar({ channelSlug, isOwner, socket }) {
             Leave Call
           </button>
         </div>
-      </div>
-    );
-  }
-
-  // State D: Active call + user is OWNER (not in call)
-  if (callActive && !inCall && isOwner) {
-    return (
-      <div className="call-bar">
-        {renderCallContainer()}
-        <div style={{ 
-          display: 'flex', 
-          alignItems: 'center', 
-          justifyContent: 'space-between',
-          gap: '12px'
-        }}>
-          <div style={{ 
-            display: 'flex', 
-            alignItems: 'center', 
-            gap: '8px'
-          }}>
+      )}
+      
+      {/* State D: Owner, call active, not in call */}
+      {callActive && !inCall && isOwner && (
+        <div className="call-bar-row">
+          <div className="call-bar-left">
             <span className="live-badge">
-              <span className="live-dot"></span>
+              <span className="live-dot" />
               LIVE
             </span>
-            <span style={{ 
-              color: '#fff',
-              fontSize: '14px',
-              fontWeight: '500'
-            }}>
+            <span className="call-info">
               Your call is active
             </span>
             {participants > 0 && (
-              <span style={{ 
-                color: '#8892A0',
-                fontSize: '13px',
-                display: 'flex',
-                alignItems: 'center',
-                gap: '4px'
-              }}>
+              <span className="participants-count">
                 👥 {participants} in call
               </span>
             )}
           </div>
-          <div style={{ display: 'flex', gap: '8px' }}>
-            <button 
-              onClick={endCall}
-              className="end-call-btn"
-            >
-              End Call
-            </button>
-          </div>
-        </div>
-      </div>
-    );
-  }
-
-  // State E: User is IN the call (owner)
-  if (callActive && inCall && isOwner) {
-    return (
-      <div className="call-bar">
-        {renderCallContainer()}
-        <div style={{ 
-          marginTop: '12px',
-          display: 'flex',
-          justifyContent: 'center'
-        }}>
           <button 
             onClick={endCall}
             className="end-call-btn"
@@ -202,14 +104,21 @@ export default function CallBar({ channelSlug, isOwner, socket }) {
             End Call
           </button>
         </div>
-      </div>
-    );
-  }
-
-  // Default: No active call + user is member
-  return (
-    <div className="call-bar">
-      {renderCallContainer()}
+      )}
+      
+      {/* State E: Owner in call */}
+      {inCall && isOwner && (
+        <div className="call-bar-row"
+          style={{ justifyContent: 'center' }}>
+          <button 
+            onClick={endCall}
+            className="end-call-btn"
+          >
+            End Call
+          </button>
+        </div>
+      )}
+      
     </div>
   );
 }
