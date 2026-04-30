@@ -49,6 +49,8 @@ export default function CallBar({ channelSlug, isOwner, socket }) {
   if (callActive && !inCall && !isOwner) {
     return (
       <div className="call-bar">
+        {/* Hidden call frame container for joining */}
+        <div className="call-frame-container" ref={callContainerRef} style={{ height: '0', overflow: 'hidden' }}></div>
         <div style={{ 
           display: 'flex', 
           alignItems: 'center', 
@@ -121,6 +123,8 @@ export default function CallBar({ channelSlug, isOwner, socket }) {
   if (callActive && !inCall && isOwner) {
     return (
       <div className="call-bar">
+        {/* Hidden call frame container for auto-join */}
+        <div className="call-frame-container" ref={callContainerRef} style={{ height: '0', overflow: 'hidden' }}></div>
         <div style={{ 
           display: 'flex', 
           alignItems: 'center', 
@@ -156,12 +160,6 @@ export default function CallBar({ channelSlug, isOwner, socket }) {
             )}
           </div>
           <div style={{ display: 'flex', gap: '8px' }}>
-            <button 
-              onClick={joinCall}
-              className="join-call-btn"
-            >
-              Join Call
-            </button>
             <button 
               onClick={endCall}
               className="end-call-btn"
